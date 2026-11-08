@@ -3,11 +3,11 @@ import { Composition, Audio, staticFile } from "remotion";
 import { BridgeShort, BRIDGE_FRAMES } from "./videos/bridge/Bridge";
 import { LakeShort, LAKE_FRAMES } from "./videos/lake/Lake";
 
-/** the lake short with its narration (the final sound mix replaces this at mux time) */
+/** the lake short with its final sound mix (voice + music + effects, shorts/lake/audio/mix.wav) */
 const LakeWithVoice: React.FC = () => (
   <>
     <LakeShort />
-    <Audio src={staticFile("lake/voice.wav")} />
+    <Audio src={staticFile("lake/mix.wav")} />
   </>
 );
 

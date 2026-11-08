@@ -295,7 +295,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     });
     one(out, cam, t, who(stroller(4), 45, "st4"), -14.5, G, -124.6, { mode: "sit", expr: "smile_closed" }, true);
   }
-  if (id === 3) { fishArc(out, t, 11.45, 3.5, -114, 0, 1); fishArc(out, t, 11.85, 8.5, -111.5, 0, -1); fishArc(out, t, 12.2, 2, -109, 0, 1); }
+  if (id === 3) { fishArc(out, t, 11.45, 7.5, -114, 0, 1); fishArc(out, t, 11.85, 12, -111.5, 0, -1); fishArc(out, t, 12.2, 6, -109, 0, 1); }
 
   // rig crew on the deck (shots 4-7), riding the rig's tilt
   if (id >= 4 && id <= 7 && rig.on) {

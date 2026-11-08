@@ -258,13 +258,13 @@ v = np.zeros((2, N)); v[:, : min(N, voice.shape[1])] = voice[:, :N]
 ir = make_ir(0.9, 3)
 mus = 0.8 * mus + 0.2 * convolve_st(mus, ir)[:, :N]
 sfx = 0.85 * sfx + 0.15 * convolve_st(sfx, ir)[:, :N]
-# levels: music bed ~16 LU under the voice, SFX ~8 LU under; then the house offsets (music +3 dB, SFX -6 dB)
+# levels: music bed ~12 LU under the voice, SFX ~5 LU under (reference: bed 5-10 dB under speech); then the house offsets (music +3 dB, SFX -6 dB)
 Lv = integrated(v)
 def to(x, target):
     L = integrated(x)
     return x * (10 ** ((target - L) / 20)) if np.isfinite(L) else x
-mus = to(mus, Lv - 16 + 3)
-sfx = to(sfx, Lv - 8 - 6)
+mus = to(mus, Lv - 12 + 3)
+sfx = to(sfx, Lv - 5 - 6)
 # duck the music under the voice (envelope follower on the voice)
 ve = np.abs(v[0]); win = ns(0.15)
 ve = np.convolve(ve, np.ones(win) / win, mode="same")
@@ -288,6 +288,8 @@ for _ in range(3):  # normalise, limit, re-measure
 tp = true_peak(mix)
 if tp > -1.0: mix *= 10 ** ((-1.0 - tp) / 20)
 write_wav(os.path.join(OUT, "mix.wav"), mix)
+os.makedirs(os.path.join(ROOT, "public/lake"), exist_ok=True)
+write_wav(os.path.join(ROOT, "public/lake/mix.wav"), mix)  # what the LakeShort composition plays
 write_wav(os.path.join(OUT, "music.wav"), mus * gain)
 write_wav(os.path.join(OUT, "sfx.wav"), sfx * gain)
 with open(os.path.join(OUT, "cues.md"), "w") as fh:

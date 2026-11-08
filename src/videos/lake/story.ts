@@ -51,11 +51,11 @@ export const SHOTS: ShotDef[] = [
   { id: 11, a: 924, b: 1001, light: "day", set: "lake" },    // the fisherman
   { id: 12, a: 1001, b: 1122, light: "day", set: "lake" },   // the canal pours in backwards as a waterfall
   { id: 13, a: 1122, b: 1170, light: "day", set: "lake" },   // "Wait. Where is all that water going?" (dive)
-  { id: 14, a: 1170, b: 1275, light: "day", set: "mine" },   // the salt mine, 55 miners
-  { id: 15, a: 1275, b: 1368, light: "day", set: "mine" },   // the electrician, water, alarm
-  { id: 16, a: 1368, b: 1430, light: "day", set: "mine" },   // "every single miner gets out" (elevator)
+  { id: 14, sunAz: 165, sunEl: 40, a: 1170, b: 1275, light: "day", set: "mine" },   // the salt mine, 55 miners
+  { id: 15, sunAz: 165, sunEl: 40, a: 1275, b: 1368, light: "day", set: "mine" },   // the electrician, water, alarm
+  { id: 16, sunAz: 165, sunEl: 40, a: 1368, b: 1430, light: "day", set: "mine" },   // "every single miner gets out" (elevator)
   { id: 17, a: 1430, b: 1486, light: "day", set: "lake" },   // "the lake doesn't" (empty bed)
-  { id: 18, a: 1486, b: 1558, light: "day", set: "mine" },   // the drill punches through the roof
+  { id: 18, sunAz: 165, sunEl: 40, a: 1486, b: 1558, light: "day", set: "mine" },   // the drill punches through the roof
   { id: 19, a: 1558, b: 1651, light: "day", set: "bath" },   // "Picture a bathtub. Pull the plug ..."
   { id: 20, a: 1651, b: 1840, light: "day", set: "bath" },   // the salt drain grows
   { id: 21, a: 1840, b: 1918, light: "golden", set: "lake" },// two days to refill
@@ -183,7 +183,7 @@ export const roofWater = (id: number, f: number) => (id === 18 ? smooth((f - 152
 export const tubState = (id: number, f: number) => {
   if (id === 19) return { level: 0.1 * smooth((f - 1600) / 50), vortex: smooth((f - 1600) / 30), hole: 0.025, salt: false, chain: smooth((f - 1586) / 10) };
   if (id === 20) {
-    const g = lin([[1651, 0.03], [1715, 0.04], [1760, 0.07], [1840, 0.2]], f);
+    const g = lin([[1651, 0.03], [1715, 0.04], [1760, 0.06], [1840, 0.12]], f);
     return { level: 0.12 + 0.55 * smooth((f - 1700) / 140), vortex: 1, hole: g, salt: true, chain: 1 };
   }
   return { level: 0, vortex: 0, hole: 0.025, salt: false, chain: 0 };
@@ -232,7 +232,7 @@ const S1c = (f: number) => dolly([-12, 16, -40], [-14, -4, 4], pushK(f, 166, 0.0
 // shot 2: establishing, from above the garden shore looking north over the calm lake
 const S2a = (f: number) => dolly([4, G + 2.6, -131.5], [0, -1.2, -70], pushK(f, 213, 0.002), { fov: 46 });
 // shot 3: the garden walk on the shore, then over to the fish jumping
-const S3a = (f: number) => dolly([-8, G + 2.0, -131.5], [-3, G + 1.3, -122.5], pushK(f, 316, 0.0025), { fov: 40 });
+const S3a = (f: number) => dolly([-4.5, G + 1.7, -117.2], [-3, G + 1.2, -123.5], pushK(f, 316, 0.0025), { fov: 42 }); // from the water's edge, looking at the walk + garden
 const S3b = (f: number) => dolly([2, G + 2.4, -127], [6, 0.8, -108], pushK(f, 338, 0.002), { fov: 40 });
 const S3c = (f: number) => dolly([-12, G + 2.6, -128], [-4, G + 1.6, -116], pushK(f, 362, 0.002, 0.005, 30), { fov: 42 });
 // shot 4: the rig and its crew
@@ -277,8 +277,8 @@ const S18a = (f: number) => dolly([ROOF[0] + 3.2, MINE_Y + 1.2, ROOF[2] - 7], [R
 // shots 19-20: the bathtub
 const S19a = (f: number) => dolly(add(TUB, [-0.25, 1.15, -2.5]), add(TUB, [0.2, 0.25, 0.25]), pushK(f, 1558, 0.0025), { fov: 44 });
 const S19b = (f: number) => dolly(add(TUB, [0.9, 0.95, -1.3]), add(DRAIN, [0, 0.3, 0]), pushK(f, 1618, 0.003), { fov: 40, roll: 0.03 });
-const S20a = (f: number) => dolly(add(DRAIN, [0.32, 0.75, -0.5]), add(DRAIN, [0, 0.02, 0]), pushK(f, 1651, 0.0025), { fov: 40 });
-const S20b = (f: number) => dolly(add(DRAIN, [0.2, 0.6, -0.42]), add(DRAIN, [0, 0, 0]), pushK(f, 1754, 0.0015, 0.006, 40), { fov: 40, roll: -0.04 });
+const S20a = (f: number) => dolly(add(DRAIN, [0.14, 0.9, -0.16]), add(DRAIN, [0, 0, 0]), pushK(f, 1651, 0.0025), { fov: 44 });
+const S20b = (f: number) => dolly(add(DRAIN, [0.1, 0.72, -0.12]), add(DRAIN, [0, 0, 0]), pushK(f, 1754, 0.0015, 0.006, 40), { fov: 44, roll: -0.04 });
 // shot 21: golden refill, the waterfall from across the lake
 const S21a = (f: number) => dolly([CANAL.x - 58, 10, CANAL.z - 48], [CANAL.x, -4, CANAL.z], pushK(f, 1840, 0.0018), { fov: 44 });
 // shot 22: barges popping up
@@ -358,7 +358,7 @@ export const DOF: Dof[] = [
   { f: 1486, cInf: 6 },             // roof
   { f: 1558, cInf: 10 },            // bathtub
   { f: 1618, cInf: 12 },
-  { f: 1651, cInf: 14 },            // drain CU
+  { f: 1651, cInf: 5 },             // drain from above (shallow depth: keep the blur mild)
   { f: 1840, cInf: 0 },             // golden wides
   { f: 2027, cInf: 12 },            // fisherman MS
 ];
