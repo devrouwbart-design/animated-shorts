@@ -21,20 +21,19 @@ Not used (sources disagree): final lake depth (200 ft vs 1,300 ft), exact waterf
 
 Analogy: pulling the plug in a bathtub, except the drain is made of salt and water dissolves salt, so the drain grows.
 
-## Script (target ~3.7 words/s)
+## Script (target ~3.7 words/s; v2: hook, then straight into "You see")
 | Beat | Line |
 |---|---|
-| Hook | In 1980, an oil crew drilled one small hole and accidentally pulled the plug on an entire lake. |
-| Setting | Lake Peigneur, Louisiana. Ten feet deep, calm, full of fish, with a fancy garden on the shore. |
-| Action 1 | A Texaco rig is drilling for oil right in the middle of it. Twelve hundred feet down, the drill gets stuck. |
-| Action 2 | Then the whole rig starts to tilt. The crew hears loud pops, jumps in a boat, and gets away just in time. |
-| Action 3 | Behind them, the lake starts to spin. A whirlpool swallows the rig. Then a tugboat. Then eleven barges, one after another. |
-| Action 4 | A fisherman floors his tiny boat and makes it to shore. Even the canal to the sea turns around and pours in backwards, as a waterfall. |
+| Hook | In 1980, an entire lake went down the drain in just a few hours, and it took an oil rig, a tugboat and eleven barges with it. |
+| You see | You see, Lake Peigneur in Louisiana is only ten feet deep. Calm, full of fish, with a fancy garden on the shore. And right in the middle, a Texaco rig is drilling for oil. |
+| Action 1 | Twelve hundred feet down, the drill gets stuck. Then the whole rig starts to tilt. The crew hears loud pops, jumps in a boat, and gets away just in time. |
+| Action 2 | Behind them, the lake starts to spin. A whirlpool swallows the rig. Then a tugboat. Then the barges, one after another. |
+| Action 3 | A fisherman floors his tiny boat and makes it to shore. Even the canal to the sea turns around and pours in backwards, as a waterfall. |
 | Mystery | Wait. Where is all that water going? |
 | Snap | Right under the lake was a salt mine, with fifty-five miners inside. An electrician spots water rushing down a tunnel and sounds the alarm. |
 | Double line | Luckily, every single miner gets out. Unluckily, the lake doesn't. |
-| Explanation | You see, the drill had punched straight through the roof of the mine. Picture a bathtub. Pull the plug, and the water swirls down the drain. But this drain was made of salt. And water dissolves salt. So the faster the lake drained, the bigger the drain got. |
-| Consequence | In a few hours, the lake was gone. It took two days for the canal to fill it back up. |
+| Explanation | The drill had punched straight through the roof of the mine. Picture a bathtub. Pull the plug, and the water swirls down the drain. But this drain was made of salt. And water dissolves salt. So the faster the lake drained, the bigger the drain got. |
+| Consequence | It took two days for the canal to fill the lake back up. |
 | Twist | And then, one by one, nine of the barges popped back up like corks. The lake came back too. Just saltier. |
 
 ## Picture notes (for the shot plan)
