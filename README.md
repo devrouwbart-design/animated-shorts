@@ -13,7 +13,7 @@ You need Node 22+, Python 3 and ffmpeg.
 npm install
 ```
 
-Then download the free Kenney 3D props: see `public/bridge/kenney/README.md`.
+The free Kenney 3D prop kits (CC0, ~500 models) are already included in `public/kenney/`.
 
 ## Make a short
 Open this folder in Claude Code and say: *"Use the cartoon short skill and make a short about ..."*.

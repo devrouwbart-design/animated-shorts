@@ -31,8 +31,9 @@ This skill lives inside the `claude-animated-shorts` project. Everything needed 
 - `src/index.ts` + `src/Root.tsx`: the Remotion entry. Register every new short in `Root.tsx`.
 - `src/videos/bridge/`: the working bridge short. New shorts go in `src/videos/<name>/`.
 - `scripts/` and `audio/`: working copies of the helper scripts and the sound pipeline (`templates/` keeps the originals).
-- `public/`: static assets. The Kenney CC0 props load from `public/bridge/kenney/<name>.glb` (Nature Kit + Fantasy
-  Town Kit from kenney.nl). They are NOT in git; without them the town renders without trees, stalls and props.
+- `public/`: static assets. The bridge's 26 Kenney CC0 props are in `public/bridge/kenney/` (with the
+  `Textures/colormap.png` the town models need). The full kits for new shorts are in `public/kenney/nature-kit/`
+  (329 models) and `public/kenney/fantasy-town-kit/` (167 models); browse them there before inventing props.
 - Per-short script, voice and sound files go in `shorts/<name>/` (SCRIPT.md, voice/, audio/). Renders go in `out/<name>/`.
 
 **Pinned versions. Do not upgrade.** The look was proven on Remotion 4.0.290, three 0.175.0, @react-three/fiber
