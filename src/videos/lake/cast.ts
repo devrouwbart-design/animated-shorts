@@ -288,14 +288,14 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
 
   // shore strollers (shots 2-3, 21-23 far away)
   if (id === 2 || id === 3) {
-    const path: [number, number, number, number][] = [[-6.5, -122.4, 1, 0], [-1.2, -122.9, 1, 0], [3.5, -122.2, -1, 0], [-11, -123.2, 1, 0]];
+    const path: [number, number, number, number][] = [[-4.8, -122.4, 1, 0], [-1.4, -122.9, -1, 0], [3.5, -122.2, -1, 0], [-11, -123.2, 1, 0]]; // first two cross the garden-walk frame
     path.forEach(([x0, z, dx], i) => {
       const x = x0 + dx * 0.9 * (t - 10.5);
       walker(out, cam, t, who(stroller(i), 40 + i, `st${i}`), x, G, z, dx, 0, i % 2 ? "smile" : "smile_closed");
     });
     one(out, cam, t, who(stroller(4), 45, "st4"), -14.5, G, -124.6, { mode: "sit", expr: "smile_closed" }, true);
   }
-  if (id === 3) { fishArc(out, t, 11.45, 7.5, -114, 0, 1); fishArc(out, t, 11.85, 12, -111.5, 0, -1); fishArc(out, t, 12.2, 6, -109, 0, 1); }
+  if (id === 3) { fishArc(out, t, 11.45, 3.5, -114, 0, 1); fishArc(out, t, 11.85, 7, -110, 0, -1); fishArc(out, t, 12.2, 3.2, -116, 0, 1); }
 
   // rig crew on the deck (shots 4-7), riding the rig's tilt
   if (id >= 4 && id <= 7 && rig.on) {

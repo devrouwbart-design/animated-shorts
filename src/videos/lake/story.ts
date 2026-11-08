@@ -278,7 +278,7 @@ const S18a = (f: number) => dolly([ROOF[0] + 3.2, MINE_Y + 1.2, ROOF[2] - 7], [R
 const S19a = (f: number) => dolly(add(TUB, [-0.25, 1.15, -2.5]), add(TUB, [0.2, 0.25, 0.25]), pushK(f, 1558, 0.0025), { fov: 44 });
 const S19b = (f: number) => dolly(add(TUB, [0.9, 0.95, -1.3]), add(DRAIN, [0, 0.3, 0]), pushK(f, 1618, 0.003), { fov: 40, roll: 0.03 });
 const S20a = (f: number) => dolly(add(DRAIN, [0.14, 0.9, -0.16]), add(DRAIN, [0, 0, 0]), pushK(f, 1651, 0.0025), { fov: 44 });
-const S20b = (f: number) => dolly(add(DRAIN, [0.1, 0.72, -0.12]), add(DRAIN, [0, 0, 0]), pushK(f, 1754, 0.0015, 0.006, 40), { fov: 44, roll: -0.04 });
+const S20b = (f: number) => dolly(add(DRAIN, [0.12, 1.0, -0.16]), add(DRAIN, [0, 0, 0]), pushK(f, 1754, 0.0015, 0.006, 40), { fov: 44, roll: -0.04 });
 // shot 21: golden refill, the waterfall from across the lake
 const S21a = (f: number) => dolly([CANAL.x - 58, 10, CANAL.z - 48], [CANAL.x, -4, CANAL.z], pushK(f, 1840, 0.0018), { fov: 44 });
 // shot 22: barges popping up

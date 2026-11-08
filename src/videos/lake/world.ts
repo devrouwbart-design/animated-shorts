@@ -758,7 +758,7 @@ export class World {
     const st = tubState(id, f), top = TUB[1];
     const lvl = top - st.level * 0.45;
     this.tubWater.set(lvl, st.vortex * (0.35 + 0.65 * Math.min(1, st.hole / 0.06)), 0.03 + 0.8 * st.hole);
-    const tm2 = this.tubWater.mesh.material as THREE.MeshLambertMaterial; tm2.transparent = true; tm2.opacity = st.salt ? 0.72 : 0.9;
+    const tm2 = this.tubWater.mesh.material as THREE.MeshLambertMaterial; tm2.transparent = true; tm2.opacity = st.salt ? 0.84 : 0.92;
     this.tubU.wSpin.value = st.vortex * 1.5; this.tubU.wLevel.value = lvl;
     // plug: in the drain until the chain is pulled, then it dangles above the water at the rim
     const pulled = st.chain, rim = new THREE.Vector3(TUB[0] + 0.85, TUB[1] + 0.12, TUB[2] - 0.2);
