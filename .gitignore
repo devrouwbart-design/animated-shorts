@@ -1,0 +1,6 @@
+node_modules/
+out/
+remotion-tmp/
+.DS_Store
+# Kenney props are downloaded per machine (CC0, see public/bridge/kenney/README.md)
+public/bridge/kenney/*.glb
