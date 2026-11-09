@@ -165,7 +165,13 @@ def sea_bed(dur, r):
 # ======================= SFX timeline =======================
 R = rng(13)
 # hook in the cabin: hum, the floating items whoosh past
-ev(0, cabin_hum(fr(130), R) * env_seg(fr(130), 0.05, 0.2)[None, :], -10, 0, "cabin hum (hook)")
+# opening outside: space drone, a rising rush toward the window, a soft "whoomp" through the glass (story frame 50)
+ev(0, space_drone(fr(56), R) * env_seg(fr(56), 0.02, 0.25)[None, :], -10, 0, "space drone (opening)")
+_rd = fr(50) - fr(8); _t = np.arange(ns(_rd)) / SR
+ev(fr(8), widen(bp(colored(len(_t), R, 0.6), 300, 6000, 1) * (_t / _rd) ** 2.2, R, 11, 1.0), -9, 0, "rush toward the window")
+ev(fr(46), S.whoosh(0.7, R, 0.12, 400, 3000, 0.8, 0.35), -3, 0, "through the window whoosh")
+ev(fr(50), thud(R, 75, 0.5, 0.3), -8, 0, "whoomp: inside")
+ev(fr(50), cabin_hum(fr(130) - fr(50), R) * env_seg(fr(130) - fr(50), 0.15, 0.2)[None, :], -10, 0, "cabin hum (hook)")
 for f0, p in [(58, -0.5), (80, 0.4), (104, -0.3)]: ev(fr(f0), S.whoosh(0.9, R, 0.45, 300, 1600, 0.8, 0.3), -9, p)
 ev(word("duct"), tape_rip(R), -1, -0.3, "tape rip (duct tape)")
 ev(word("plastic"), crinkle(R, 0.6), -2, 0.3, "bag crinkle")
@@ -296,8 +302,10 @@ def pizz(t0, t1, chords, vel=0.5, step=1.0, hi=True):
         t += Q * step; k += 1
 
 C, Am, F_, G7, Dm, E7, Bb = [48, 64, 67, 72], [45, 64, 69, 72], [41, 65, 69, 72], [43, 62, 65, 71], [38, 65, 69, 74], [40, 64, 68, 71], [46, 62, 65, 70]
-# hook: sneaky pizz in D minor, glock on each item
-pizz(0.05, fr(126), [Dm, Am, Dm, E7], 0.42, 0.5, hi=False)
+# opening: a shimmering vibes arpeggio rising with the rush, then the sneaky pizz in D minor inside, glock on each item
+for k in range(10): note("vibes", fr(4) + k * (fr(48) - fr(4)) / 10, [62, 65, 69, 72, 74, 77, 81, 84, 86, 89][k], 0.4, 0.35 + 0.04 * k, 0.4 - 0.08 * k)
+drum("crash", fr(50), 0.45, 0, -9)
+pizz(fr(50), fr(126), [Dm, Am, Dm, E7], 0.42, 0.5, hi=False)
 for t0, m in [(word("duct"), 86), (word("plastic"), 88), (word("sock"), 93)]: note("glock", t0, m, 0.3, 0.6, 0.3)
 # space: wonder (Cmaj9 pad + vibes arpeggio)
 padc(fr(130), fr(292), [48, 55, 64, 71, 74], 0.33, -4)
@@ -384,7 +392,7 @@ ve = np.convolve(ve, np.ones(win) / win, mode="same")
 duck = 1 - 0.45 * np.clip(ve / (np.percentile(ve, 95) + 1e-9), 0, 1)
 mus *= duck[None, :]
 mix = v + mus + sfx
-def limit(x, thr_db=-1.5, rel=0.08):
+def limit(x, thr_db=-2.4, rel=0.08):
     thr = 10 ** (thr_db / 20); w = ns(0.002)
     pk = np.max(np.abs(x), axis=0)
     pk = np.maximum.reduce([np.roll(pk, -k) for k in range(w)])
@@ -395,7 +403,7 @@ def limit(x, thr_db=-1.5, rel=0.08):
         out[i] = cur
     return x * out[None, :]
 gain = 1.0
-for _ in range(3):
+for _ in range(5):
     k = 10 ** ((-14 - integrated(mix)) / 20); mix = limit(mix * k); gain *= k
 tp = true_peak(mix)
 if tp > -1.0: mix *= 10 ** ((-1.0 - tp) / 20)

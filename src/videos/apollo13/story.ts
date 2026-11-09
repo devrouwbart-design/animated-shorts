@@ -20,6 +20,7 @@ export const sea = (x: number, y: number, z: number) => at(SEA, x, y, z);
 
 // spacecraft (space set at the origin): stack along x, the Moon is ahead (-x), Earth behind (+x)
 export const HOLE: V3 = [4.6, 0, 1.95];          // blown-out service-module bay (faces +z)
+export const LMWIN: V3 = [-3.67, 0.38, 1.56];     // the lander's upper triangle window (faces +z; the lander's "up" is +x)
 // cabin furniture (local cabin coords)
 export const CO2: V3 = [0.62, 1.55, 1.07];       // CO2 meter on the back panel (faces -z)
 export const O2: V3 = [-0.62, 1.55, 1.07];       // oxygen gauge
@@ -58,7 +59,7 @@ export type Set = "space" | "cab" | "mcc" | "hotel" | "sea";
 export type ShotDef = { id: number; a: number; b: number; light: Light; set: Set; sunAz?: number; sunEl?: number };
 const IN = { sunAz: 165, sunEl: 40 };
 export const SHOTS: ShotDef[] = [
-  { id: 1, a: 0, b: 130, light: "day", set: "cab", ...IN },        // hook: duct tape, a plastic bag and a sock (flash-forward)
+  { id: 1, a: 52, b: 130, light: "day", set: "cab", ...IN },       // hook inside: duct tape, a plastic bag and a sock (flash-forward)
   { id: 2, a: 130, b: 278, light: "day", set: "space" },           // "Apollo thirteen ... on its way to the Moon"
   { id: 3, a: 278, b: 349, light: "day", set: "space" },           // "Then, bang. An oxygen tank explodes."
   { id: 4, a: 349, b: 380, light: "day", set: "cab", ...IN },      // "Alarms everywhere."
@@ -87,23 +88,25 @@ export const SHOTS: ShotDef[] = [
   { id: 27, a: 1635, b: 1714, light: "day", set: "cab", ...IN },   // "And that famous line ...? Nobody ever said it."
   { id: 28, a: 1714, b: 1787, light: "day", set: "mcc", ...IN },   // "The real words were 'Houston, we've had a problem.'"
   { id: 29, a: 1787, b: TOTAL, light: "golden", set: "sea" },      // "Past tense. Thanks to a sock, it stayed that way."
+  // opening (listed last so SHOTS[id - 1] still works): outside the spacecraft, rushing in through the lander window
+  { id: 30, a: 0, b: 52, light: "day", set: "space" },             // "Three astronauts were saved from suffocating in space"
 ];
 /** crossfades at place / time changes; a white 4-frame flash after the hook */
-export const XFADE: Record<number, number> = { 15: 8, 19: 8, 24: 10, 26: 8, 29: 10 };
+export const XFADE: Record<number, number> = { 1: 6, 15: 8, 19: 8, 24: 10, 26: 8, 29: 10 };
 export const FLASH_AT = 130;
 
 export const shotAt = (f: number) => SHOTS.find((s) => f >= s.a && f < s.b) ?? SHOTS[SHOTS.length - 1];
 export const layersAt = (f: number): { id: number; alpha: number }[] => {
   for (const s of SHOTS) {
     const x = XFADE[s.id];
-    if (x && f >= s.a - x / 2 && f < s.a + x / 2) return [{ id: s.id - 1, alpha: 1 }, { id: s.id, alpha: (f - (s.a - x / 2) + 1) / (x + 1) }];
+    if (x && f >= s.a - x / 2 && f < s.a + x / 2) return [{ id: shotAt(s.a - 0.5).id, alpha: 1 }, { id: s.id, alpha: (f - (s.a - x / 2) + 1) / (x + 1) }];
   }
   return [{ id: shotAt(f).id, alpha: 1 }];
 };
 
 // ---------------- story state (pure functions of shot id + frame) ----------------
 /** has the oxygen tank blown? (panel off, debris, gas) */
-export const blown = (id: number, f: number) => (id === 3 ? f >= 292 : id > 3);
+export const blown = (id: number, f: number) => (id === 3 ? f >= 292 : id > 3 && id !== 30);
 /** CO2 meter needle 0 (green, left) .. 1 (red, right) */
 export const co2At = (id: number, f: number) => {
   if (id === 1) return 0.06;
@@ -186,8 +189,15 @@ const S3a = (f: number) => dolly([1.5, 3.5, 15.5], [4.2, 0.2, 1.5], pushK(f, 278
 const S7a = (f: number) => dolly([15, -4, 13], [2, 0, 1], pushK(f, 442, 0.0025), { fov: 42, roll: -0.6 });
 const S9a = (f: number) => dolly([-17, 6.5, 14], [-1.5, 0, 0], pushK(f, 545, 0.0025, 0.005, 30), { fov: 40, roll: 0.6 });
 const S17a = (f: number) => dolly([-52, 22, 60], [0, 0, 0], pushK(f, 1011, 0.0012), { fov: 32, roll: 0.3 });
-// --- cabin
-const S1a = (f: number) => dolly(cab(-0.5, 1.42, -2.45), cab(-0.78, 1.18, 0.0), pushK(f, 0, 0.0022), { fov: 42 });
+// --- opening: wide on the stack, then an accelerating rush into the lander window (roll turns the lander's +x to screen up)
+const S30a = (f: number): Shot => {
+  const u = clamp01(f / 50), e = u * u * u * (u * (6 * u - 15) + 10), k = Math.pow(u, 2.4);
+  const p0: V3 = [-26, 9, 30], p1: V3 = [LMWIN[0], LMWIN[1], LMWIN[2] + 0.22];
+  const l0: V3 = [-0.5, 0, 0], l1 = LMWIN;
+  return { pos: p0.map((v, i) => v + (p1[i] - v) * k) as V3, look: l0.map((v, i) => v + (l1[i] - v) * e) as V3, fov: 40 - 6 * e, roll: 0.55 + (-Math.PI / 2 - 0.55) * e };
+};
+// --- cabin (the hook starts just inside the window and pulls back to the crew)
+const S1a = (f: number) => { const u = glide((f - 50) / 26); return dolly(cab(-0.62, 1.38, -1.2 - 1.25 * u), cab(-0.78, 1.18, 0.0), pushK(f, 76, 0.0022), { fov: 42 }); };
 const S4a = (f: number) => dolly(cab(0.05, 1.5, -2.7), cab(0.0, 1.35, 0.1), pushK(f, 349, 0.003, 0.007, 20), { fov: 42, roll: 0.05 });
 const S5a = (f: number) => dolly(cab(-0.1, 1.6, -1.5), cab(-0.4, 1.5, 0.2), pushK(f, 380, 0.003), { fov: 38, roll: -0.04 });
 const S8a = (f: number) => dolly(cab(0.1, 1.2, -2.6), cab(0.0, 1.65, 0.15), pushK(f, 482, 0.002), { fov: 44 });
@@ -221,7 +231,8 @@ const S26a = (f: number) => { const y = capY(26, f); return { pos: sea(12, 2.2, 
 const S29a = (f: number) => dolly(sea(6.6, 1.75, -8.0), sea(4.05, 1.1, -3.0), pushK(f, 1783, 0.0022, 0.005, 30), { fov: 40 });
 
 const CAMS: Record<number, Key[]> = {
-  1: [{ f: 0, s: S1a }],
+  30: [{ f: 0, s: S30a }],
+  1: [{ f: 46, s: S1a }],
   2: [{ f: 130, s: S2a }, { f: 232, dur: 32, s: S2b }],
   3: [{ f: 278, s: S3a }],
   4: [{ f: 349, s: S4a }],
@@ -275,7 +286,8 @@ export const camAt = (id: number, f: number): Cam => {
 // ---------------- lens ----------------
 export type Dof = { f: number; dur?: number; cInf: number; focus?: (f: number) => V3 };
 export const DOF: Dof[] = [
-  { f: 0, cInf: 12 },      // hook: mailbox + crew
+  { f: 0, cInf: 0 },       // opening outside: sharp
+  { f: 52, cInf: 12 },     // hook: mailbox + crew
   { f: 130, cInf: 0 },     // space wides stay sharp
   { f: 349, cInf: 11 },    // alarm
   { f: 380, cInf: 13 },    // radio CU

@@ -19,6 +19,9 @@
 Code: `src/videos/apollo13/` (composition `Apollo13Short`, 1080x1920, 30 fps, 2181 frames, 29 shots, one-word subtitles in the Ricks Clips look from `Captions.tsx`). Sound:
 `audio/apollo13_sound.py` (its `mix.wav` is copied to `public/apollo13/mix.wav`, which the composition plays).
 
+Opening: outside the spacecraft, an accelerating rush into the lander's glowing window where two of the crew peek out,
+then through the glass into the cabin (shot 30, listed last in `SHOTS`).
+
 Sets: space (Apollo stack, stars, Earth and Moon placed per shot), the lunar-module cabin (CO2 meter, round filter
 holder, overhead hatch, the duct-taped mailbox), 1970 mission control (tiered consoles, trajectory wall screen, the junk
 table), a hotel room for the charger analogy, the Pacific splashdown and the sunset raft.

@@ -2,7 +2,11 @@
 
 | time (s) | frame | cue |
 |---|---|---|
-|   0.00 | 0 | cabin hum (hook) |
+|   0.00 | 0 | space drone (opening) |
+|   0.30 | 9 | rush toward the window |
+|   1.76 | 53 | through the window whoosh |
+|   1.91 | 57 | cabin hum (hook) |
+|   1.91 | 57 | whoomp: inside |
 |   2.58 | 77 | tape rip (duct tape) |
 |   3.37 | 101 | bag crinkle |
 |   4.39 | 132 | sock boing |

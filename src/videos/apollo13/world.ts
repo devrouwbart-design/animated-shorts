@@ -165,6 +165,25 @@ const starWinTex = () => ctex("a13starwin", 256, 256, (g, r) => {
   g.fillStyle = "#0e1546"; g.fillRect(0, 0, 256, 256);
   for (let i = 0; i < 60; i++) { g.fillStyle = "#ffffff"; g.beginPath(); g.arc(r() * 256, r() * 256, 0.8 + r() * 1.8, 0, Math.PI * 2); g.fill(); }
 });
+/** the lander window from outside: warm cabin light, panel lamps, and two of the crew peeking out (one per pane).
+ *  Canvas x = u (along the lander's y), canvas y = 1 - v (v along the lander's +x, which is screen up in the opening). */
+const windowTex = () => ctex("a13window", 1024, 512, (g, r) => {
+  const gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, "#fff1cf"); gr.addColorStop(1, "#f0b86a"); g.fillStyle = gr; g.fillRect(0, 0, 1024, 512);
+  for (let i = 0; i < 40; i++) { g.fillStyle = ["#ffcf4a", "#7be07b", "#ff9b5a", "#ffffff"][Math.floor(r() * 4)]; g.fillRect(r() * 1024, 380 + r() * 120, 18, 12); }
+  g.fillStyle = "rgba(120,80,40,0.25)"; g.fillRect(0, 360, 1024, 152);
+  const face = (cx: number, cy: number, hair: string, skin: string, grin: boolean) => {
+    g.lineWidth = 12; g.strokeStyle = "#241726";
+    g.fillStyle = "#e9ecef"; g.beginPath(); g.ellipse(cx, cy + 150, 95, 70, 0, 0, Math.PI * 2); g.fill(); g.stroke(); // shoulders
+    g.fillStyle = skin; g.beginPath(); g.ellipse(cx, cy, 78, 84, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = hair; g.beginPath(); g.ellipse(cx, cy - 34, 80, 54, 0, Math.PI, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = "#241726"; for (const dx of [-26, 26]) { g.beginPath(); g.ellipse(cx + dx, cy + 6, 9, 13, 0, 0, Math.PI * 2); g.fill(); }
+    g.lineWidth = 9; g.beginPath(); if (grin) g.arc(cx, cy + 30, 26, 0.15 * Math.PI, 0.85 * Math.PI); else { g.moveTo(cx - 18, cy + 40); g.lineTo(cx + 18, cy + 38); } g.stroke();
+    g.fillStyle = "#ffffff"; g.globalAlpha = 0.35; g.beginPath(); g.ellipse(cx + 40, cy - 40, 14, 30, -0.6, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1; // glass glint
+  };
+  face(745, 300, "#5a3b2a", "#ffe2c2", true);
+  face(279, 300, "#c9a46a", "#ecd0b6", false);
+  g.fillStyle = "rgba(255,255,255,0.18)"; g.beginPath(); g.moveTo(560, 0); g.lineTo(700, 0); g.lineTo(560, 512); g.lineTo(420, 512); g.fill(); // glass sheen
+});
 const stripeTex = () => ctex("a13chute", 512, 256, (g) => {
   for (let i = 0; i < 16; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#ee7a2c"; g.fillRect(i * 32, 0, 32, 256); }
 });
@@ -293,6 +312,7 @@ const haloTex = () => ctex("sunHalo", 256, 256, (g) => {
 /** Earth / Moon per space shot, in screen terms of the shot camera at frame f0: [sx, sy (-1..1), distance, radius, f0] */
 type Body = [number, number, number, number, number];
 const BODIES: Record<number, { earth?: Body; moon?: Body }> = {
+  30: { earth: [0.3, -0.5, 650, 46, 0], moon: [-0.35, 0.62, 780, 30, 0] },
   2: { earth: [0.1, 0.5, 650, 42, 160], moon: [-0.15, 0.55, 760, 36, 270] },
   3: { earth: [-0.2, -0.62, 800, 30, 300] },
   7: { earth: [0.25, -0.55, 700, 48, 450] },
@@ -414,7 +434,6 @@ export class World {
     b.add(boxGeo(V(-5.0, -1.25, -1.35), V(-2.7, 1.25, 1.35), 0, true), lm);
     b.add(boxGeo(V(-4.6, -1.5, -1.0), V(-3.0, 1.5, 1.0), 0, true), lm);
     b.add(boxGeo(V(-4.4, -0.9, 1.35), V(-3.1, 0.9, 1.55), 0, true), tm("#8e939b"));
-    for (const s of [-1, 1]) b.add(new THREE.BufferGeometry().setFromPoints([V(-3.3, s * 0.15, 1.56), V(-4.2, s * 0.15, 1.56), V(-3.5, s * 0.85, 1.56)]).setIndex(s > 0 ? [0, 1, 2] : [0, 2, 1]), tm2("#1d2548"));
     for (const s of [-1, 1]) b.add(alongX(new THREE.CylinderGeometry(0.55, 0.55, 1.4, 20)).translate(-3.9, s * 1.55, -0.6), tm("#b8bcc2"));
     b.add(new THREE.CylinderGeometry(2.15, 2.15, 1.9, 8).rotateZ(Math.PI / 2).rotateX(Math.PI / 8).translate(-5.95, 0, 0), foil);
     b.add(alongX(new THREE.CylinderGeometry(0.35, 0.75, 0.7, 20, 1, true)).translate(-7.25, 0, 0), tm2("#3b3d44"));
@@ -427,6 +446,21 @@ export class World {
       b.add(new THREE.CylinderGeometry(0.42, 0.42, 0.1, 16).rotateZ(Math.PI / 2).translate(-4.35, 2.8 * cy, 2.8 * cz), foil);
     }
     b.build(S, true);
+    // the two triangle windows: warm lit cabin behind the glass with the crew peeking out (unlit + a little HDR so it
+    // glows); one picture spans both panes: u runs along y (screen across once the lander is stood up), v along x (up)
+    const wt = windowTex(); wt.colorSpace = THREE.SRGBColorSpace; wt.anisotropy = 8;
+    const wm = new THREE.MeshBasicMaterial({ map: wt, color: new THREE.Color(1.25, 1.2, 1.1), side: THREE.DoubleSide });
+    for (const s of [-1, 1]) {
+      const pts = [V(-3.3, s * 0.15, 1.56), V(-4.2, s * 0.15, 1.56), V(-3.5, s * 0.85, 1.56)];
+      const g = new THREE.BufferGeometry().setFromPoints(pts);
+      g.setAttribute("uv", new THREE.Float32BufferAttribute(pts.flatMap((p) => [(p.y + 0.85) / 1.7, (p.x + 4.2) / 0.9]), 2));
+      const m = mesh(S, g, wm); m.layers.set(NOINK);
+    }
+    for (const s of [-1, 1]) for (const [a, c] of [[V(-3.3, s * 0.15, 1.565), V(-4.2, s * 0.15, 1.565)], [V(-4.2, s * 0.15, 1.565), V(-3.5, s * 0.85, 1.565)], [V(-3.5, s * 0.85, 1.565), V(-3.3, s * 0.15, 1.565)]] as const) {
+      const d = c.clone().sub(a), g2 = new THREE.CylinderGeometry(0.035, 0.035, d.length(), 8);
+      g2.applyMatrix4(new THREE.Matrix4().compose(a.clone().add(c).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), d.normalize()), V(1, 1, 1)));
+      mesh(S, g2, tm("#2e3238"));
+    }
     // the bay-4 panel (blows off)
     this.panel = mesh(S, alongX(new THREE.CylinderGeometry(1.97, 1.97, 7.0, 16, 1, true, -Math.PI / 6, Math.PI / 3)), sm, true);
     (this.panel.material as THREE.Material).side = THREE.DoubleSide;
