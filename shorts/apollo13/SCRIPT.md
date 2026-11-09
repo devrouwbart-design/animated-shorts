@@ -26,7 +26,7 @@ Visual note (not narrated): the "engineers with crew cuts and pocket protectors"
 
 Analogy: a phone charger that doesn't fit the wall socket abroad (square filter, round holder).
 
-## Script (v1, 258 words, ~70 s at 3.7 words/s)
+## Script (v1, APPROVED by the user 2026-11-09, 258 words, ~70 s at 3.7 words/s)
 | Beat | Line |
 |---|---|
 | Hook | Three astronauts were saved from suffocating in space by duct tape, a plastic bag and a sock. |
