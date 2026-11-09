@@ -7,7 +7,7 @@ description: Make a ~55-70 s vertical cartoon story short in the "2D characters 
 
 Proven example: **The Bridge That Fell for a Song**. It is an original 67 s short about the 1831 Broughton bridge and 74 soldiers marching in step.
 - Code: `src/videos/bridge/` of this project (composition `BridgeShort`, 1080x1920, 30 fps, registered in `src/Root.tsx`).
-- Script, voice and sound: `~/bridge-short/`.
+- Script, voice and sound: originally `~/bridge-short/` on the author's machine (not in this repo). New shorts keep theirs in `shorts/<name>/`.
 - Style research: `references/`.
 
 The style reference is a channel studied privately (`references/`: STYLE_BIBLE.md, reports/*.md, frames/).
@@ -57,6 +57,49 @@ re-test a still before keeping any version change. `npm run typecheck` shows 6 h
   Kokoro) and `hyperframes transcribe` (word-level timestamps for `words.json`), `hyperframes beats` / `audio` for
   checking where sounds land. Its studio and renders run separately from Remotion (`hyperframes init <dir>` makes
   its own project folder; keep those under `hyperframes/<name>/`). The cartoon 3D shorts themselves stay in Remotion.
+
+## Second example: the lake short (start new shorts from this one)
+**The Lake That Went Down the Drain** (Lake Peigneur 1980, 70 s, 23 shots, 3 sets) is the newer, more general template.
+Prefer copying it over the bridge when a story needs several places or water.
+- Code: `src/videos/lake/` (composition `LakeShort` in `src/Root.tsx`). Files: `story.ts` (shots, story state as pure
+  functions of shot id + frame, cameras, kicks, DOF), `world.ts` (sets, built once, posed per frame), `cast.ts`
+  (characters + 2D effects per shot), `Lake.tsx` (post chain), plus the shared look files copied from the bridge
+  (`build/paint/toon/shade/lights/cardshade/ink/grade/lensblur.ts`).
+- Several sets in one world: `ShotDef.set` picks which `THREE.Group` is visible (lake / mine 160 m underground /
+  bathroom far away). Indoor sets: build with `castShadow = false` and give their shots `sunAz: 165, sunEl: 40` (light
+  from behind the lens) or the walls turn lavender in the two-tone shade.
+- Water: `makeWater()` in `world.ts` (whirlpool shader: marks rotate faster near the centre so they shear into a
+  spiral; funnel depth from `funnel()`), a polar `Swirl` mesh for the lake, `TubWater` grid for small basins.
+- `toon.ts` additions: hat `"hardhat"`, effects `fxFish`, `fxBang`, `fxSalt`.
+- Per-short files: `shorts/lake/` (SCRIPT.md with sources, voice/, audio/, README.md with the render command).
+- Vertical frames are narrow (about 24 degrees across at fov 42): anything more than ~12 degrees off the look line
+  is out of frame. Put characters and effects ON the camera's look line, then check a still.
+
+## Voice workflow that worked (lake short)
+1. ElevenLabs connector: `creative_list_voices` (search the name), `creative_create_flow`, then
+   `creative_generate_speech` with model `eleven_v4`. Write numbers as words ("nineteen eighty"). The user's favourite:
+   **Henry – Deep, Professional, and Soothing** (`pVnrL6sighQX7hVz89cp`), but he reads slowly (~3.2 words/s).
+2. Download the take (the environment must allow `elevenlabsusercontent.com`). Then tighten it with ffmpeg: cap
+   pauses at ~0.18 s (cut the middle of each long silence found by `silencedetect`), then `atempo` to hit 3.7
+   words/s (1.21 for Henry), `aresample=48000`, mono WAV.
+3. Word timings without any download: `pip install pocketsphinx` (its English model is inside the package) and
+   force-align the exact script text to the voice (`Decoder.set_align_text`). Write `voice/words.json` as
+   `[{word, start, end}]`. Check sentence starts against `silencedetect` pause ends.
+   Careful when looking words up: a word can appear twice in the script; take the right occurrence.
+
+## Sound workflow (lake short)
+`audio/lake_sound.py` is a complete, reusable mix script: an event list (`ev(time, sound, dB, pan, cue)`) using the
+generators in `sfx_gen.py` (water, whooshes, creaks, splashes, birds...) and `instruments.py` (pizzicato, glock, tuba,
+music box, pad) for an original score; music ducked under the voice; levels music ~12 LU and SFX ~5 LU under the
+voice before the house offsets (+3 / -6 dB); a limiter to -14 LUFS / -1.3 dBTP. It writes `shorts/<name>/audio/mix.wav`
+and `public/<name>/mix.wav`, which the composition plays via `<Audio>`, so one `remotion render` gives the finished
+video. Copy it per short and rewrite the event list and score sections. Needs numpy + scipy.
+
+## Where to render
+Cloud sessions have no GPU (~30 s per still at scale 0.5, a full short ~15 h). Do script, voice, sound, shot plan and
+test stills in any session (`GL=swangle node scripts/stills.mjs <Comp> out/<name>/x_ <frames> 0.5`); the full render
+belongs on the user's computer: `npx remotion render src/index.ts <Comp> out/<name>/final.mp4 --codec h264 --crf 16
+--scale 1.3333 --gl=angle`.
 
 ## Pipeline
 1. **Topic and facts.** Pick one surprising true story with a physical cause and effect (it should be visual), plus a simple everyday analogy that explains it.
