@@ -319,9 +319,12 @@ export const DOF: Dof[] = [
   { f: 1714, cInf: 12 },
   { f: 1787, cInf: 0 },    // golden raft: sharp (lens blur here softened the whole frame)
 ];
+/** lens blur strength multiplier for the whole film: 0 = every shot fully sharp (the user asked for no blur; the
+ *  per-shot table above is kept so it can be brought back at a lower strength, e.g. 0.3) */
+export const DOF_SCALE = 0;
 export const dofAt = (f: number) => {
   let i = 0; while (i + 1 < DOF.length && f >= DOF[i + 1].f) i++;
   const d = DOF[i], p = DOF[Math.max(0, i - 1)];
   const k = d.dur ? Math.min(1, (f - d.f) / d.dur) : 1;
-  return { cInf: p.cInf + (d.cInf - p.cInf) * k, focus: d.focus };
+  return { cInf: DOF_SCALE * (p.cInf + (d.cInf - p.cInf) * k), focus: d.focus };
 };
