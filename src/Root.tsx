@@ -3,6 +3,7 @@ import { Composition, Audio, staticFile } from "remotion";
 import { BridgeShort, BRIDGE_FRAMES } from "./videos/bridge/Bridge";
 import { LakeShort, LAKE_FRAMES } from "./videos/lake/Lake";
 import { Apollo13Short, APOLLO13_FRAMES } from "./videos/apollo13/Apollo13";
+import { Captions as Apollo13Captions } from "./videos/apollo13/Captions";
 
 /** the lake short with its final sound mix (voice + music + effects, shorts/lake/audio/mix.wav) */
 const LakeWithVoice: React.FC = () => (
@@ -12,10 +13,11 @@ const LakeWithVoice: React.FC = () => (
   </>
 );
 
-/** the Apollo 13 short with its final sound mix (shorts/apollo13/audio/mix.wav) */
+/** the Apollo 13 short with one-word subtitles and its final sound mix (shorts/apollo13/audio/mix.wav) */
 const Apollo13WithSound: React.FC = () => (
   <>
     <Apollo13Short />
+    <Apollo13Captions />
     <Audio src={staticFile("apollo13/mix.wav")} />
   </>
 );

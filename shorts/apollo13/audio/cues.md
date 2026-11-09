@@ -3,57 +3,57 @@
 | time (s) | frame | cue |
 |---|---|---|
 |   0.00 | 0 | cabin hum (hook) |
-|   2.26 | 68 | tape rip (duct tape) |
-|   2.94 | 88 | bag crinkle |
-|   3.83 | 115 | sock boing |
-|   4.27 | 128 | flash whoosh |
-|   4.33 | 130 | space drone |
-|   9.73 | 292 | BANG: oxygen tank explodes |
-|   9.77 | 293 | venting oxygen hiss |
-|  10.83 | 325 | second jolt |
-|  11.63 | 349 | MASTER ALARM |
-|  13.00 | 390 | radio crackle |
-|  13.50 | 405 | Quindar beep |
-|  13.50 | 405 | mission control room |
-|  14.27 | 428 | controllers: oh |
-|  14.73 | 442 | still venting |
-|  14.80 | 444 | power-down whine |
-|  16.07 | 482 | lander cabin |
-|  16.87 | 506 | squeeze creak |
-|  17.47 | 524 | POP through the hatch |
-|  20.53 | 616 | three squished |
-|  22.56 | 677 | gauge click |
-|  23.88 | 716 | exhale |
-|  26.57 | 797 | needle creaks up |
-|  27.27 | 818 | canister held up |
-|  28.17 | 845 | air: low thump |
-|  30.50 | 915 | CLONK: square on round |
-|  30.87 | 926 | hotel room tone |
-|  31.00 | 930 | footsteps |
-|  31.00 | 930 | jet lands outside |
-|  32.87 | 986 | plug: plastic clack |
-|  33.70 | 1011 | lonely space |
-|  35.47 | 1064 | gasps |
-|  36.20 | 1086 | mission control room |
-|  38.60 | 1158 | canister on the table |
-|  40.40 | 1212 | bags |
-|  41.07 | 1232 | cardboard slaps |
-|  41.80 | 1254 | hoses flop |
-|  42.67 | 1280 | the sock (boing) |
-|  43.40 | 1302 | tape rolls clunk |
-|  44.67 | 1340 | cardboard |
-|  45.53 | 1366 | tape |
-|  46.13 | 1384 | hose squeak |
-|  46.93 | 1408 | Quindar beep |
-|  46.93 | 1408 | radio static |
-|  48.33 | 1450 | STEP rip |
-|  48.33 | 1450 | cabin |
-|  50.87 | 1526 | mailbox shimmer |
-|  52.20 | 1566 | needle drops |
-|  53.07 | 1592 | relieved sigh |
-|  53.37 | 1601 | parachutes flutter + wind |
-|  54.17 | 1625 | SPLASHDOWN |
-|  56.43 | 1693 | record scratch: nobody said it |
-|  57.13 | 1714 | Quindar beep |
-|  59.40 | 1782 | sunset waves |
-|  60.43 | 1813 | sock up |
+|   2.58 | 77 | tape rip (duct tape) |
+|   3.37 | 101 | bag crinkle |
+|   4.39 | 132 | sock boing |
+|   4.92 | 147 | flash whoosh |
+|   5.00 | 150 | space drone |
+|  11.24 | 337 | BANG: oxygen tank explodes |
+|  11.28 | 338 | venting oxygen hiss |
+|  12.52 | 376 | second jolt |
+|  13.44 | 403 | MASTER ALARM |
+|  15.05 | 451 | radio crackle |
+|  15.58 | 467 | Quindar beep |
+|  15.58 | 467 | mission control room |
+|  16.52 | 496 | controllers: oh |
+|  17.08 | 513 | still venting |
+|  17.16 | 515 | power-down whine |
+|  18.65 | 559 | lander cabin |
+|  19.56 | 587 | squeeze creak |
+|  20.25 | 607 | POP through the hatch |
+|  23.80 | 714 | three squished |
+|  26.24 | 787 | gauge click |
+|  27.76 | 833 | exhale |
+|  30.91 | 927 | needle creaks up |
+|  31.75 | 953 | canister held up |
+|  32.79 | 984 | air: low thump |
+|  35.48 | 1064 | CLONK: square on round |
+|  35.92 | 1078 | hotel room tone |
+|  36.09 | 1083 | footsteps |
+|  36.09 | 1083 | jet lands outside |
+|  38.24 | 1147 | plug: plastic clack |
+|  39.21 | 1176 | lonely space |
+|  41.27 | 1238 | gasps |
+|  42.15 | 1264 | mission control room |
+|  44.91 | 1347 | canister on the table |
+|  47.00 | 1410 | bags |
+|  47.78 | 1433 | cardboard slaps |
+|  48.49 | 1455 | hoses flop |
+|  49.63 | 1489 | the sock (boing) |
+|  50.51 | 1515 | tape rolls clunk |
+|  52.00 | 1560 | cardboard |
+|  52.99 | 1590 | tape |
+|  53.67 | 1610 | hose squeak |
+|  54.60 | 1638 | Quindar beep |
+|  54.60 | 1638 | radio static |
+|  56.20 | 1686 | STEP rip |
+|  56.20 | 1686 | cabin |
+|  59.18 | 1775 | mailbox shimmer |
+|  60.73 | 1822 | needle drops |
+|  61.72 | 1852 | relieved sigh |
+|  62.07 | 1862 | parachutes flutter + wind |
+|  63.02 | 1890 | SPLASHDOWN |
+|  65.71 | 1971 | record scratch: nobody said it |
+|  66.53 | 1996 | Quindar beep |
+|  69.21 | 2076 | sunset waves |
+|  70.43 | 2113 | sock up |

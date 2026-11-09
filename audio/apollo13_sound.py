@@ -13,10 +13,15 @@ import instruments as I
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 OUT = os.path.join(ROOT, "shorts/apollo13/audio")
 os.makedirs(OUT, exist_ok=True)
-FPS, TOTAL = 30, 1875
+# frames in this file are STORY frames (the picture's clock, see shorts/apollo13/voice/make_timing.py); fr() maps a story
+# frame to seconds of the real narration, so every sound lands where the picture puts it
+FPS = 30
+_W = json.load(open(os.path.join(ROOT, "shorts/apollo13/voice/warp.json")))
+TOTAL = _W["real_frames"]
+_STORY = np.array(_W["story"])
 DUR = TOTAL / FPS
 N = ns(DUR)
-fr = lambda f: f / FPS
+fr = lambda f: float(np.interp(f, _STORY, np.arange(len(_STORY)))) / FPS
 W = {}
 for w in json.load(open(os.path.join(ROOT, "shorts/apollo13/voice/words.json"))):
     W.setdefault(w["word"].lower(), []).append(w["start"])
@@ -176,7 +181,7 @@ ev(fr(292), widen(S.rattle(0.9, R, 80), R, 9, 1.0), -8, 0)
 ev(fr(325), thud(R, 70, 0.6, 0.5), -6, 0.2, "second jolt")
 ev(fr(293), hiss(fr(349) - fr(293), R) * env_seg(fr(349) - fr(293), 0.02, 0.1)[None, :], -12, 0, "venting oxygen hiss")
 # alarms (shots 4-5) + radio crackle
-ev(fr(349), alarm(fr(405) - fr(349), R) * env_seg(fr(405) - fr(349), 0.005, 0.15), -2, 0, "MASTER ALARM")
+ev(fr(349), alarm(fr(405) - fr(349), R, (fr(405) - fr(349)) / 4) * env_seg(fr(405) - fr(349), 0.005, 0.15), -2, 0, "MASTER ALARM")
 ev(fr(349), cabin_hum(fr(405) - fr(349), R), -14)
 ev(word("crackles") - 0.05, static(fr(405) - word("crackles") + 0.4, R, 4), -5, 0.1, "radio crackle")
 # mission control hears it
@@ -217,7 +222,7 @@ ev(fr(930), jet_by(1.3, R), -13, 0, "jet lands outside")
 ev(fr(986), addm(thud(R, 900, 0.08, 1.0), S.clink(R, 2400, 0.08, 0.6)), -1, 0, "plug: plastic clack")
 ev(fr(988), boing(R, 140, 0.5), -12, 0)
 # up here
-ev(fr(1011), space_drone(fr(1064) - fr(1011), R) * env_seg(fr(1011) - fr(1011) + fr(53), 0.3, 0.1)[None, :], -11, 0, "lonely space")
+ev(fr(1011), space_drone(fr(1064) - fr(1011), R) * env_seg(fr(1064) - fr(1011), 0.3, 0.1)[None, :], -11, 0, "lonely space")
 # out of air: gasps
 ev(fr(1064), cabin_hum(fr(1090) - fr(1064), R), -15)
 for k, f0 in enumerate([1064, 1074, 1083]): ev(fr(f0), breath(R, 0.35, 700, 3000, inhale=True), -10, -0.3 + 0.3 * k, "gasps" if k == 0 else "")

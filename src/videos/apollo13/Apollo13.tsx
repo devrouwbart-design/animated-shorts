@@ -18,9 +18,12 @@ import { InkPass, noInkFallback } from "./ink";
 import { LensBlur, GrainEffect } from "./lensblur";
 import { GradeEffect, GRADES, GRADE_STRENGTH, gradeFor } from "./grade";
 import { Kit } from "./build";
-import { TOTAL, FLASH_AT, SHOTS, layersAt, dofAt } from "./story";
+import { FLASH_AT, SHOTS, layersAt, dofAt } from "./story";
+import { STORY, REAL_FRAMES } from "./timing";
 
-export const APOLLO13_FRAMES = TOTAL;
+export const APOLLO13_FRAMES = REAL_FRAMES;
+/** real frame -> story frame (the picture is written on the first cut's clock; timing.ts re-times it to the narration) */
+export const toStory = (f: number) => STORY[Math.max(0, Math.min(STORY.length - 1, Math.round(f)))];
 
 /** A/B switches for test stills only (Remotion inputProps `{ post: { ink: false, ... } }`); everything is on by default. */
 type PostToggles = { ink: boolean; lens: boolean; pre: boolean; bloom: boolean; grade: boolean; grain: boolean };
@@ -46,8 +49,7 @@ const useKit = () => {
   return kit;
 };
 
-const Inner: React.FC<{ id: number; kit: Kit }> = ({ id, kit }) => {
-  const f = useCurrentFrame();
+const Inner: React.FC<{ id: number; kit: Kit; f: number }> = ({ id, kit, f }) => {
   const { camera, scene } = useThree();
   const world = useMemo(() => new World(kit), [kit]);
   const target = useMemo(() => new THREE.Vector3(), []);
@@ -82,7 +84,7 @@ const Inner: React.FC<{ id: number; kit: Kit }> = ({ id, kit }) => {
   fx.lens.focus = Math.max(0.3, fpt.sub(cam.position).dot(fwd));
   fx.lens.cInf = d.cInf;
   gradeFor(fx.grade, SHOTS[id - 1].light);
-  fx.grain.seed = f; // deterministic per frame
+  fx.grain.seed = Math.round(f * 7); // deterministic per frame
   return (
     <>
       <primitive object={world.root} dispose={null} />
@@ -93,23 +95,23 @@ const Inner: React.FC<{ id: number; kit: Kit }> = ({ id, kit }) => {
 
 /** test stills only: inputProps `{ post: { dpr: 0.5 } }` forces the WebGL buffer size (R3F clamps dpr to >= 1 by default) */
 const dprOverride = () => (getInputProps() as { post?: { dpr?: number } }).post?.dpr;
-const ShotView: React.FC<{ id: number; kit: Kit; alpha: number }> = ({ id, kit, alpha }) => (
+const ShotView: React.FC<{ id: number; kit: Kit; alpha: number; f: number }> = ({ id, kit, alpha, f }) => (
   <AbsoluteFill style={{ opacity: alpha }}>
     <ThreeCanvas width={1080} height={1920} {...(dprOverride() ? { dpr: dprOverride() } : {})} shadows gl={{ antialias: false, stencil: false, powerPreference: "high-performance", toneMappingExposure: 1.0 }}
       camera={{ fov: 40, near: 0.2, far: 1600 }}>
-      <Inner id={id} kit={kit} />
+      <Inner id={id} kit={kit} f={f} />
     </ThreeCanvas>
   </AbsoluteFill>
 );
 
 export const Apollo13Short: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = toStory(useCurrentFrame());
   const kit = useKit();
   if (!kit) return null;
-  const flash = f >= FLASH_AT && f < FLASH_AT + 4 ? [1, 0.75, 0.45, 0.2][f - FLASH_AT] : 0;
+  const flash = f >= FLASH_AT && f < FLASH_AT + 4 ? [1, 0.75, 0.45, 0.2][Math.floor(f - FLASH_AT)] : 0;
   return (
     <AbsoluteFill style={{ background: "#0b1038" }}>
-      {layersAt(f).map((l, i) => <ShotView key={i ? "over" : "base"} id={l.id} kit={kit} alpha={l.alpha} />)}
+      {layersAt(f).map((l, i) => <ShotView key={i ? "over" : "base"} id={l.id} kit={kit} alpha={l.alpha} f={f} />)}
       {flash > 0 && <AbsoluteFill style={{ background: "#ffffff", opacity: flash }} />}
     </AbsoluteFill>
   );

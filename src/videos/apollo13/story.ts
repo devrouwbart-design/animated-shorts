@@ -305,7 +305,7 @@ export const DOF: Dof[] = [
   { f: 1605, cInf: 0 },    // splashdown
   { f: 1635, cInf: 13 },
   { f: 1714, cInf: 12 },
-  { f: 1787, cInf: 7 },    // golden raft
+  { f: 1787, cInf: 0 },    // golden raft: sharp (lens blur here softened the whole frame)
 ];
 export const dofAt = (f: number) => {
   let i = 0; while (i + 1 < DOF.length && f >= DOF[i + 1].f) i++;

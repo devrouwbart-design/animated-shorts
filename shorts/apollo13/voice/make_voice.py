@@ -1,6 +1,7 @@
-"""Apollo 13 voice: tighten pauses, speed up to the target length, force-align the script to get word timings.
+"""Apollo 13 voice: tighten pauses, speed up, force-align the script to get word timings.
 
-python shorts/apollo13/voice/make_voice.py [take.mp3] [target_seconds]
+python shorts/apollo13/voice/make_voice.py [take.mp3] [target_seconds | xTEMPO] [pause_cap_s]
+  e.g. `make_voice.py henry_raw.mp3 x1.21 0.18` (the lake short's natural pace: atempo 1.21, pauses up to 0.18 s)
   -> voice.wav (48 kHz mono) + words.json [{word, start, end}] next to this file.
 Needs ffmpeg (with rubberband) on PATH, numpy, pocketsphinx.
 """
@@ -10,8 +11,8 @@ from pocketsphinx import Decoder
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "henry_raw.mp3")
-TARGET = float(sys.argv[2]) if len(sys.argv) > 2 else 62.0
-CAP = 0.14          # longest pause kept (s)
+ARG = sys.argv[2] if len(sys.argv) > 2 else "x1.21"
+CAP = float(sys.argv[3]) if len(sys.argv) > 3 else 0.18   # longest pause kept (s)
 SR = 48000
 
 
@@ -51,12 +52,13 @@ with wave.open(tight, "wb") as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
     w.writeframes((np.clip(y, -1, 1) * 32767).astype("<i2").tobytes())
 dur = len(y) / SR
-tempo = dur / TARGET
+tempo = float(ARG[1:]) if ARG.startswith("x") else dur / float(ARG)
 print(f"tightened {dur:.2f} s -> tempo {tempo:.3f}")
 
-# 2. speed up without changing pitch (rubberband sounds cleaner than atempo above ~1.25)
+# 2. speed up without changing pitch: plain atempo at gentle rates (as the lake short), rubberband only above 1.3
 out = os.path.join(HERE, "voice.wav")
-run("ffmpeg", "-y", "-v", "error", "-i", tight, "-af", f"rubberband=tempo={tempo:.4f}:pitch=1:transients=crisp:formant=preserved,aresample={SR}", "-ac", "1", "-c:a", "pcm_s16le", out)
+af = f"atempo={tempo:.4f}" if tempo <= 1.3 else f"rubberband=tempo={tempo:.4f}:pitch=1:transients=crisp:formant=preserved"
+run("ffmpeg", "-y", "-v", "error", "-i", tight, "-af", f"{af},aresample={SR}", "-ac", "1", "-c:a", "pcm_s16le", out)
 os.remove(tight)
 vd = float(run("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", out).stdout)
 print(f"voice.wav {vd:.2f} s")
