@@ -17,6 +17,7 @@ import { TONE, CHAR, untone, twoTone } from "./shade";
 import { NOINK } from "./ink";
 import { Pool, Actor, Fx, stage, SU, Place } from "./cast";
 import { buildCountry, buildSummer, flatMat } from "./country";
+import { buildCastlePath, buildFountain, buildWindmill } from "./landmarks";
 import {
   FPS, SHOTS, ShotDef, camAt, sunDirOf, DAIS, DAIS_TOP, CASTLE, CASTLE_AZ, HILL_H, TAB, TOY, torchAt, cloudIn, smooth, V3,
 } from "./story";
@@ -140,6 +141,7 @@ export class World {
   private winterOn: boolean | null = null;
   private swaps: { m: THREE.MeshLambertMaterial; summer: THREE.Texture | null; winter: THREE.Texture; col?: string }[] = [];
   private rod = new THREE.Group();
+  private sails: THREE.Group | null = null;
   private summer = new THREE.Group(); // summer-only dressing: hidden in winter shots (it would block the low suns)
   private torch = new THREE.Group();
   private pool2!: THREE.Mesh;
@@ -213,7 +215,11 @@ export class World {
     const dir = new THREE.Vector2(CASTLE[0], CASTLE[2]).normalize(), nrm = new THREE.Vector2(-dir.y, dir.x);
     const p0 = new THREE.Vector2(-16, 12), p1 = new THREE.Vector2(CASTLE[0], CASTLE[2]).addScaledVector(dir, -30), hw = 2.6;
     const c = (p: THREE.Vector2, s: number) => V(p.x + nrm.x * hw * s, 0, p.y + nrm.y * hw * s);
-    b.add(quad(c(p0, -1), c(p0, 1), c(p1, 1), c(p1, -1), 1, p0.distanceTo(p1) / 4), dirt);
+    void c; void p1; void quad; // the old flat dirt road is replaced by the flagstone path (landmarks.ts)
+    const lb = new Batch(), lg = new THREE.Group();
+    const ps = buildCastlePath(lb); this.swaps.push({ m: ps.m, summer: ps.m.map, winter: ps.winter });
+    this.sails = buildWindmill(lb, lg, 150, -170, Math.atan2(-150, 170));
+    lb.build(lg); W.add(lg);
     // houses: north row (fronts on z = -18, facing south), east row (fronts on x = 24, facing west, with a street
     // gap at z 6..26 so the winter morning sun comes in), a few on the south-east corner
     let x = -36, k = 0;
@@ -229,7 +235,15 @@ export class World {
     prop(b, kit, "stall-green", 11.5, 0, -13.2, 3.2, -0.15);
     prop(b, kit, "stall-bench", 14.5, 0, -11.2, 1.0, 0.4);
     prop(b, kit, "cart", 19.5, 0, -6, 2.2, 1.9);
-    prop(b, kit, "fountain-round", 13, 0, -4.5, 1.6);
+    buildFountain(b, 13, -4.5);
+    // market goods in crates in front of the stalls
+    const crateM = lam("goodsCrate", () => ({ color: "#c98a4a" })), goods = [lam("gApple", () => ({ color: "#ff3b3b" })), lam("gOrange", () => ({ color: "#ff9a1f" })), lam("gCabbage", () => ({ color: "#7fd14a" })), lam("gPlum", () => ({ color: "#8a4ad0" }))];
+    const ball = new THREE.IcosahedronGeometry(0.11, 1);
+    for (const [gx, gz] of [[-12.2, -12.1], [-11.2, -12.0], [-10.2, -12.1], [10.3, -11.8], [11.3, -11.7], [12.3, -11.8]] as const) {
+      const gi = Math.abs(Math.round(gx * 3)) % 4;
+      b.add(boxGeo(V(gx - 0.42, 0, gz - 0.3), V(gx + 0.42, 0.42, gz + 0.3)), crateM);
+      for (let i = 0; i < 12; i++) b.add(ball, goods[gi], new THREE.Matrix4().makeTranslation(gx - 0.3 + (i % 4) * 0.2, 0.47 + (i > 7 ? 0.1 : 0), gz - 0.15 + Math.floor(i / 4) * 0.15));
+    }
     for (const [lx, lz] of [[-19, -16.5], [21.5, -16], [-6, -16.8], [6, -16.8]] as const) prop(b, kit, "lantern", lx, 0, lz, 2.9);
     prop(b, kit, "banner-red", -3.2, DAIS_TOP, -14.6, 3.2);
     prop(b, kit, "banner-red", 3.2, DAIS_TOP, -14.6, 3.2);
@@ -239,7 +253,6 @@ export class World {
       return (az > 196 && az < 262 && d < 420) || (az > 108 && az < 142 && d < 160);
     };
     void corridor;
-    prop(b, kit, "windmill", 150, 0, -170, 18, -0.6);
     const country = new THREE.Group();
     for (const sw of buildCountry(country, kit, snowTex)) this.swaps.push({ m: sw.m, summer: sw.m.map, winter: sw.winter });
     W.add(country);
@@ -385,6 +398,7 @@ export class World {
     for (const [k, g] of Object.entries(this.sets)) g.visible = k === s.set;
     this.setWinter(!!s.winter);
     this.summer.visible = !s.winter;
+    if (this.sails) this.sails.rotation.z = -f * 0.02;
     // ---- sun ----
     const sunDir = V(...sunDirOf(s));
     let torchP: V3 | null = null;

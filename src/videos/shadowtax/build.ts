@@ -511,7 +511,10 @@ export const house = (b: Batch, x: number, z: number, yaw: number, w: number, d:
   const cx = hw * 0.45 * (si % 2 ? 1 : -1);
   b.add(boxGeo(V(cx - 0.4, h + rh * 0.3, -hd * 0.35 - 0.4), V(cx + 0.4, h + rh + 1.1, -hd * 0.35 + 0.4), 2), lam("chim", () => ({ map: rep(brick(), 1, 1) })), m);
   houseDetail(b, m, w, d, h, rh, cx);
+  CHIMNEYS.push(V(cx, h + rh + 1.1 + 0.6, -hd * 0.35).applyMatrix4(m));
 };
+/** world position of every chimney pot (filled as houses are built; cast.ts puffs smoke from them) */
+export const CHIMNEYS: THREE.Vector3[] = [];
 
 // round 4: real 3D relief on every house (was a flat window-textured box): stone plinth, cornice under the eaves,
 // window sills + lintel hoods matching facadeHD's window layout, front door step + door hood, chimney cap and pot

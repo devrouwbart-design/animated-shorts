@@ -12,6 +12,7 @@ import {
 import { NOINK } from "./ink";
 import { cardShade, blobMaterial, CARD_K } from "./cardshade";
 import type { Light } from "./lights";
+import { CHIMNEYS } from "./build";
 
 // ---------------- canvas pool ----------------
 type Entry = { cv: HTMLCanvasElement; tex: THREE.CanvasTexture; w: number; h: number };
@@ -267,6 +268,71 @@ const pHand = (p: Pen) => {
   for (const y of [205, 232, 259]) p.arc(232, y, 30, 12, 300, 420, 6);               // knuckles
 };
 
+
+// ---------------- life: smoke, birds, chickens, people going about their day ----------------
+/** chimney smoke puff (400 x 400): soft lumps that grow and thin out, u 0..1 */
+const pSmoke = (p: Pen, u: number, a0: number) => {
+  for (const [x, y, rr] of [[200, 230, 90], [140, 250, 64], [262, 248, 70], [196, 168, 66]] as const)
+    p.ell(x, y, rr * (0.7 + 0.5 * u), rr * (0.62 + 0.45 * u), `rgba(236,236,242,${(a0 * (1 - u) ** 1.2).toFixed(3)})`, 0);
+};
+/** a bird in flight (200 x 120): two wing arcs, flap 0..1 */
+const pBird = (p: Pen, flap: number) => {
+  const up = 40 - 70 * flap;
+  p.stroke([[20, 60 + up * 0.6], [60, 60 - up * 0.2], [100, 70]], 12, "#3a3348");
+  p.stroke([[100, 70], [140, 60 - up * 0.2], [180, 60 + up * 0.6]], 12, "#3a3348");
+  p.dot(100, 72, 9, "#3a3348");
+};
+/** a chicken in the character design space (600 x 1000, feet at 975), peck 0..1 */
+const pChicken = (p: Pen, peck: number) => {
+  const hy = 800 + 80 * peck, hx = 372 + 22 * peck;
+  p.stroke([[288, 900], [282, 972]], 8, "#e8892c"); p.stroke([[318, 900], [324, 972]], 8, "#e8892c");
+  p.poly([[214, 880], [190, 830], [236, 852]], "#c0503a", 9);                         // tail
+  p.ell(300, 880, 82, 58, "#fbf3e2", 11);                                              // body
+  p.line([[350, 860], hx < 380 ? [360, 830] : [372, 845], [hx, hy]], "#fbf3e2", 34);    // neck
+  p.ell(hx, hy, 28, 26, "#fbf3e2", 10);                                                // head
+  p.poly([[hx - 8, hy - 30], [hx + 2, hy - 46], [hx + 12, hy - 30]], "#e8403a", 6);     // comb
+  p.poly([[hx + 24, hy - 4], [hx + 48, hy + 4], [hx + 24, hy + 10]], "#f2b234", 6);     // beak
+  p.dot(hx + 8, hy - 6, 6, INK);
+  p.ell(285, 878, 40, 22, "#ece2cc", 0); p.arc(285, 878, 40, 22, 200, 340, 7);         // wing
+};
+const BG_PATHS: [V3, V3][] = [[[-17, 0, -15.0], [17, 0, -15.0]], [[20.6, 0, -13], [20.6, 0, 12]], [[-13, 0, 13.5], [15, 0, 13.5]], [[-19, 0, -9], [-19, 0, 9]]];
+const life = (out: Stage, cam: CamInfo, t: number, id: number) => {
+  const f = t * FPS, s = SHOTS[id - 1];
+  if (s.set !== "town") return;
+  // chimney smoke: the closest chimneys in front of the lens, thicker on cold winter days
+  const fwd = new THREE.Vector3(0, 1, 0).cross(cam.right).normalize(), a0 = s.winter ? 0.85 : s.light === "overcast" ? 0.55 : 0.45;
+  const near = CHIMNEYS.map((c) => ({ c, d: c.distanceTo(cam.pos), ok: c.clone().sub(cam.pos).dot(fwd) > 0 })).filter((x) => x.ok && x.d < 160).sort((a, b) => a.d - b.d).slice(0, 12);
+  near.forEach(({ c }, k) => {
+    for (let j = 0; j < 4; j++) {
+      const u = (((f / 90 + j / 4 + k * 0.137) % 1) + 1) % 1, uq = q(u, 24);
+      out.fx.push({ key: `smoke${a0}|${uq}`, cw: 400, ch: 400, draw: (pn) => pSmoke(pn, uq, a0), x: c.x + 1.8 * u, y: c.y + 0.4 + 4.5 * u, z: c.z - 1.0 * u, w: 1.1 + 2.4 * u, h: 1.1 + 2.4 * u, soft: true });
+    }
+  });
+  // birds circling over the town (not on the overcast day)
+  if (s.light !== "overcast") for (let k = 0; k < 9; k++) {
+    const dir = k % 2 ? 1 : -1, a = dir * f * 0.004 + k * 0.7, rr = 34 + k * 7, cx = k < 5 ? 0 : CASTLE_X * 0.5, cz = k < 5 ? 0 : CASTLE_Z * 0.5;
+    const flap = q(0.5 + 0.5 * Math.sin(f * 0.45 + k * 1.3), 6);
+    fx(out, `bird${flap}`, 200, (pn) => pBird(pn, flap), cx + Math.cos(a) * rr, 22 + (k % 4) * 4 + Math.sin(f * 0.03 + k) * 1.5, cz + Math.sin(a) * rr, 1.0, { h: 0.6, ch: 120 });
+  }
+  if (s.winter || s.light === "golden") return;
+  // chickens pecking by the stalls and the cart
+  ([[9.4, -10.8], [10.7, -10.1], [-9.3, -11.2], [17.2, -3.6]] as const).forEach(([x, z], k) => {
+    const peck = q(Math.max(0, Math.sin(f * 0.22 + k * 1.9)) ** 3, 4);
+    out.places.push({ key: `chick${peck}`, x, y: 0, z, scale: 1, mirror: k % 2 === 1, size: [480, 800, 0.8], draw: (pn) => pChicken(pn, peck) });
+    blob(out, x, 0, z, 0.5);
+  });
+  // townsfolk going about their day along the edges of the square (not in the shots the story crowds)
+  if ([2, 3, 4, 5, 15, 16, 17, 18, 19, 28].includes(id)) BG_PATHS.forEach(([a, b], k) => {
+    for (const j of [0, 1]) {
+      const L = Math.hypot(b[0] - a[0], b[2] - a[2]), ph = ((t * 1.05 + k * 7 + j * L * 0.9) % (2 * L) + 2 * L) % (2 * L), back = ph > L, u = back ? 2 - ph / L : ph / L;
+      const pos: V3 = [a[0] + (b[0] - a[0]) * u, 0, a[2] + (b[2] - a[2]) * u], dx = (b[0] - a[0]) / L * (back ? -1 : 1), dz = (b[2] - a[2]) / L * (back ? -1 : 1);
+      const o = [MAN(k + 2 * j), MAID(k + j), MAN(k + 5), MAID(k + 3)][(k + j) % 4];
+      walker(out, cam, t, 40 + k * 2 + j, o, pos, dx, dz, (k + j) % 3 ? "smile" : "neutral", 1.0, 1, (k + j) % 3 === 0 ? { prop: "icecream" } : {});
+    }
+  });
+};
+const CASTLE_X = -116.1, CASTLE_Z = 78.3;
+
 /** everything with a face (and the 2D effects) in shot `id` at time t */
 export const stage = (id: number, t: number, cam: CamInfo): Stage => {
   const out: Stage = { places: [], fx: [] };
@@ -433,6 +499,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
       one(out, cam, t, i, o, p, { expr: k % 2 ? "laugh" : "grin", wave: dance(k), headTilt: 6 * Math.sin(f * 0.3 + k) }, o === TALL ? 1.14 : 1);
     });
   }
+  life(out, cam, t, id);
   void bodySide; void fxStars; void SD;
   return out;
 };

@@ -101,16 +101,22 @@ export const buildCountry = (root: THREE.Object3D, kit: Kit, snow: () => THREE.T
 
   // ---------------- patchwork fields with hedgerows and fences ----------------
   const fieldMats = FIELDS.map((f, i) => { const m = flatMat("field" + i, f(), "#ffffff", 1); swaps.push({ m, winter: snow() }); return m; });
+  // trimmed hedges: a leafy box with a soft rounded top, snow-dusted in winter
   const hedgeM = lam("hedgeRow", () => ({ map: hedgeTex() }));
+  swaps.push({ m: hedgeM, winter: ctex("hedgeSnow", 256, 128, (g, rr) => { g.fillStyle = "#3f8e3a"; g.fillRect(0, 0, 256, 128); for (let i = 0; i < 140; i++) { g.fillStyle = rr() < 0.6 ? "rgba(245,250,255,0.85)" : "rgba(30,100,30,0.5)"; g.beginPath(); g.arc(rr() * 256, rr() * 128, 4 + rr() * 9, 0, 7); g.fill(); } }) });
   const hedge = (x0: number, z0: number, x1: number, z1: number) => {
-    const L = Math.hypot(x1 - x0, z1 - z0), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-    if (!sunClear(cx, cz, 1.3, L / 2)) return;
-    const g = new THREE.CapsuleGeometry(0.55, Math.max(0.1, L - 1.1), 4, 8).rotateZ(Math.PI / 2).scale(1, 1.1, 1).translate(0, 0.55, 0);
-    b.add(g, hedgeM, M4(cx, 0, cz, -Math.atan2(z1 - z0, x1 - x0)));
+    const L = Math.hypot(x1 - x0, z1 - z0), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, yaw = -Math.atan2(z1 - z0, x1 - x0);
+    if (!sunClear(cx, cz, 1.3, L / 2) || roadDist(cx, cz) < L / 2 + 5) return;
+    b.add(boxGeo(V(-L / 2, 0, -0.45), V(L / 2, 1.0, 0.45), 1.2), hedgeM, M4(cx, 0, cz, yaw));
+    b.add(new THREE.CylinderGeometry(0.45, 0.45, L, 10, 1, false, 0, Math.PI).rotateZ(Math.PI / 2).rotateX(-Math.PI / 2).translate(0, 1.0, 0), hedgeM, M4(cx, 0, cz, yaw));
   };
+  // post-and-rail fences: a post every 2.4 m, two rails, all one wood
+  const fenceM = lam("fenceWood", () => ({ color: "#9a6a3e" }));
   const fence = (x0: number, z0: number, x1: number, z1: number) => {
-    const L = Math.hypot(x1 - x0, z1 - z0), n = Math.floor(L / 2), yaw = -Math.atan2(z1 - z0, x1 - x0);
-    for (let i = 0; i < n; i++) { const u = (i + 0.5) / n; prop(b, kit, "fence_simple", x0 + (x1 - x0) * u, 0, z0 + (z1 - z0) * u, 1.0, yaw); }
+    const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.round(L / 2.4)), yaw = -Math.atan2(z1 - z0, x1 - x0), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (roadDist(cx, cz) < L / 2 + 5) return;
+    for (let i = 0; i <= n; i++) { const u = i / n; b.add(boxGeo(V(-0.07, 0, -0.07), V(0.07, 1.15, 0.07)), fenceM, M4(x0 + (x1 - x0) * u, 0, z0 + (z1 - z0) * u, yaw)); }
+    for (const y of [0.45, 0.9]) b.add(boxGeo(V(-L / 2, y - 0.05, -0.03), V(L / 2, y + 0.05, 0.03)), fenceM, M4(cx, 0, cz, yaw));
   };
   const CW = 30, CD = 22, ang = 0.13, ca = Math.cos(ang), sa = Math.sin(ang);
   for (let i = -12; i <= 12; i++) for (let j = -15; j <= 15; j++) {
@@ -319,7 +325,9 @@ export const buildSummer = (root: THREE.Object3D, kit: Kit) => {
     b.add(head, face, M(0.78, 0.95, 0));
     for (const [lx, lz] of [[0.4, 0.25], [0.4, -0.25], [-0.4, 0.25], [-0.4, -0.25]]) b.add(leg, face, M(lx, 0.28, lz));
   }
-  for (let t = 46; t < 80; t += 2) { const [x, z] = at(t, -12.5); prop(b, kit, "fence_simple", x, 0, z, 1.0, -Math.atan2(uz, ux)); }
+  { const fm = lam("fenceWood", () => ({ color: "#9a6a3e" })), [ax, az] = at(46, -12.5), [bx, bz] = at(80, -12.5), Lf = Math.hypot(bx - ax, bz - az), yw = -Math.atan2(bz - az, bx - ax);
+    for (let i = 0; i <= 14; i++) { const u = i / 14; b.add(boxGeo(V(-0.07, 0, -0.07), V(0.07, 1.15, 0.07)), fm, M4(ax + (bx - ax) * u, 0, az + (bz - az) * u, yw)); }
+    for (const y of [0.45, 0.9]) b.add(boxGeo(V(-Lf / 2, y - 0.05, -0.03), V(Lf / 2, y + 0.05, 0.03)), fm, M4((ax + bx) / 2, 0, (az + bz) / 2, yw)); }
   // carts and haystacks along the way
   for (const [t, n] of [[40, 9], [88, -10], [104, 11]] as const) { const [x, z] = at(t, n); prop(b, kit, "cart", x, 0, z, 2.2, r() * 6); }
   b.build(root);
