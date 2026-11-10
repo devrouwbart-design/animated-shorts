@@ -81,5 +81,5 @@ export function cardShade(m: THREE.MeshLambertMaterial) {
 export const blobMaterial = (map: THREE.Texture) => new THREE.MeshBasicMaterial({
   map, transparent: false, depthWrite: false, fog: false, toneMapped: false,
   blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.ZeroFactor, blendDst: THREE.SrcColorFactor,
-  polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, side: THREE.DoubleSide,
+  polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -40, side: THREE.DoubleSide,
 });

@@ -477,14 +477,15 @@ type Style = { wall: string; shutter: string; roof: string; timber?: boolean; br
 // round 3: saturation -35 % on every wall (neutral warm grey / beige; the salmon became a warm greige)
 // round 4: the pale greiges still read lavender-grey in shade -> a muted brick / cream / ochre / terracotta spread
 const STYLES: Style[] = [
-  { wall: "#ecdab2", shutter: "#3f6fb5", roof: "#d27a62" },              // cream
-  { wall: "#d8a95f", shutter: "#2f6a43", roof: "#b8644f" },              // ochre
-  { wall: "#c47a5c", shutter: "#2f5f6a", roof: "#8f97a8" },              // muted brick-red plaster
-  { wall: "#efdcb8", shutter: "#2f5f6a", roof: "#c9775a", timber: true }, // cream timber frame
-  { wall: "#ddbd78", shutter: "#5a3b2a", roof: "#d27a62" },              // straw ochre
-  { wall: "#cc9a6c", shutter: "#3f6fb5", roof: "#8e7aa0" },              // terracotta sand
-  { wall: "#e2c49a", shutter: "#8c3b4a", roof: "#c9775a" },              // warm sandstone
-  { wall: "#e3d2b8", shutter: "#2f6a43", roof: "#8f97a8", brick: true },
+  // shadow tax round 2: brighter, more saturated storybook palette
+  { wall: "#ffe7a8", shutter: "#2f7fe0", roof: "#f0573f" },              // butter cream
+  { wall: "#ffbf4a", shutter: "#24a34a", roof: "#e04a36" },              // sunflower ochre
+  { wall: "#ff8a5c", shutter: "#2f6fd0", roof: "#4f7fe0" },              // coral
+  { wall: "#fff0d0", shutter: "#e03f4f", roof: "#f0573f", timber: true }, // cream timber frame
+  { wall: "#ffd65c", shutter: "#8a4ad0", roof: "#ff6a3a" },              // lemon
+  { wall: "#ffb08a", shutter: "#2f7fe0", roof: "#9a5fe0" },              // peach
+  { wall: "#9fdcff", shutter: "#ff5a3a", roof: "#f0573f" },              // sky blue
+  { wall: "#ffe3c0", shutter: "#24a34a", roof: "#4f7fe0", brick: true },
 ];
 const roofMat = (col: string) => lam("roof" + col, () => ({ map: roofHD(col, col === "#8f97a8"), side: THREE.DoubleSide }));
 
@@ -515,6 +516,7 @@ export const house = (b: Batch, x: number, z: number, yaw: number, w: number, d:
 // round 4: real 3D relief on every house (was a flat window-textured box): stone plinth, cornice under the eaves,
 // window sills + lintel hoods matching facadeHD's window layout, front door step + door hood, chimney cap and pot
 const UB = new THREE.BoxGeometry(1, 1, 1);
+const FLOWER = new THREE.IcosahedronGeometry(1, 0);
 const trimM = () => lam("trimStone", () => ({ color: "#efe3c8" }));
 const capM = () => lam("chimCap", () => ({ color: "#9a8778" }));
 const plinthM = () => lam("plinthHD", () => ({ map: stoneHD("copeHD") }));
@@ -537,6 +539,15 @@ const houseDetail = (b: Batch, m: THREE.Matrix4, w: number, d: number, h: number
         ub(b, plinthM(), m, Math.min(ax, bx, ax + out[0] * 0.5), Math.max(ax, bx, ax + out[0] * 0.5), 0, 0.2, Math.min(az, bz, az + out[1] * 0.5), Math.max(az, bz, az + out[1] * 0.5)); // step
         ub(b, tm, m, Math.min(cx2, dx2, cx2 + out[0] * 0.34), Math.max(cx2, dx2, cx2 + out[0] * 0.34), 2.3, 2.44, Math.min(cz2, dz2, cz2 + out[1] * 0.34), Math.max(cz2, dz2, cz2 + out[1] * 0.34)); // hood
         continue;
+      }
+      if (door && fl > 0 && ((px * 7.3 + fl * 3.1 + w) % 3) < 1.9) { // flower box under the window
+        const ax = px - out[1] * 0.55, az = pz + out[0] * 0.55, bx = px + out[1] * 0.55, bz = pz - out[0] * 0.55, dp = 0.32;
+        ub(b, lam("planterBox", () => ({ color: "#9a5a30" })), m, Math.min(ax, bx, ax + out[0] * dp), Math.max(ax, bx, ax + out[0] * dp), yb - 0.42, yb - 0.16, Math.min(az, bz, az + out[1] * dp), Math.max(az, bz, az + out[1] * dp));
+        const cols = ["#ff3d5a", "#ffd23f", "#ff7ad9", "#ff8a2a"];
+        for (let k = 0; k < 4; k++) {
+          const u = -0.42 + k * 0.28, fx = px + out[1] * u + out[0] * 0.16, fz = pz - out[0] * u + out[1] * 0.16;
+          b.add(FLOWER, lam("bloom" + k, () => ({ color: cols[k] })), m.clone().multiply(new THREE.Matrix4().compose(V(fx, yb - 0.1, fz), new THREE.Quaternion(), V(0.14, 0.12, 0.14))));
+        }
       }
       for (const [y0, y1, dep, half] of [[yb - 0.2, yb - 0.08, 0.14, 0.6], [yb + 1.33, yb + 1.43, 0.08, 0.55]] as const) {
         const ax = px - out[1] * half, az = pz + out[0] * half, bx = px + out[1] * half, bz = pz - out[0] * half;

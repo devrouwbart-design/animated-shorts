@@ -175,8 +175,9 @@ export const colWalk = (f: number): V3 => onSun(-3 - 9 * smooth((f - 1596) / 76)
 // 1: start high over the castle hill, rush over the roofs and land on the king on his dais
 const S1a = (f: number): Shot => {
   const u = clamp01(f / 56), e = glide(u), k = Math.pow(u, 1.8);
-  const p0: V3 = [CASTLE[0] + 30, 70, CASTLE[2] - 10], p1: V3 = [1.4, 2.4, -6.6];
-  const l0: V3 = [-30, 0, 20], l1: V3 = [KING_AT[0], KING_AT[1] + 1.6, KING_AT[2]];
+  const back: V3 = [CASTLE[0] / 140, 0, CASTLE[2] / 140];   // unit vector from the square toward the castle
+  const p0: V3 = [CASTLE[0] + back[0] * 60, 58, CASTLE[2] + back[2] * 60], p1: V3 = [1.4, 2.4, -6.6];
+  const l0: V3 = [CASTLE[0] * 0.45, 4, CASTLE[2] * 0.45], l1: V3 = [KING_AT[0], KING_AT[1] + 1.6, KING_AT[2]];
   return { pos: mixV(p0, p1, k), look: mixV(l0, l1, e), fov: 46 - 8 * e, roll: 0.25 * (1 - e) };
 };
 const S1b = (f: number) => dolly([1.4, 2.4, -6.6], [KING_AT[0], KING_AT[1] + 1.6, KING_AT[2]], pushK(f, 56, 0.004), { fov: 38 });

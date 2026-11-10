@@ -16,6 +16,7 @@ import { LIGHTS, LOOK, Light } from "./lights";
 import { TONE, CHAR, untone, twoTone } from "./shade";
 import { NOINK } from "./ink";
 import { Pool, Actor, Fx, stage, SU, Place } from "./cast";
+import { buildCountry, buildSummer, flatMat } from "./country";
 import {
   FPS, SHOTS, ShotDef, camAt, sunDirOf, DAIS, DAIS_TOP, CASTLE, CASTLE_AZ, HILL_H, TAB, TOY, torchAt, cloudIn, smooth, V3,
 } from "./story";
@@ -24,6 +25,8 @@ import {
 const KIT: [string, string][] = [
   ...["lantern", "cart", "stall-red", "stall-green", "stall-bench", "banner-red", "banner-green", "windmill"].map((n) => [n, `bridge/kenney/${n}.glb`] as [string, string]),
   ...["fountain-round"].map((n) => [n, `kenney/fantasy-town-kit/${n}.glb`] as [string, string]),
+  ...["fence_simple", "log_stack", "crop_pumpkin", "stump_old", "stump_round", "stone_largeA", "stone_largeC", "stone_smallB", "mushroom_red",
+    "flower_redA", "flower_yellowA", "flower_purpleA", "lily_large"].map((n) => [n, `kenney/nature-kit/${n}.glb`] as [string, string]),
 ];
 let kitP: Promise<Kit> | null = null;
 export const loadKit = () => {
@@ -105,7 +108,7 @@ const shadowMat = () => new THREE.ShaderMaterial({
   fragmentShader: "uniform sampler2D map; uniform vec3 col; varying vec2 vUv; void main(){ if (texture2D(map, vUv).a < 0.5) discard; gl_FragColor = vec4(col, 1.0); }",
   transparent: false, depthWrite: false, side: THREE.DoubleSide,
   blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.ZeroFactor, blendDst: THREE.SrcColorFactor,
-  polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+  polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -40,
 });
 class ShadowCard {
   mesh: THREE.Mesh; mat: THREE.ShaderMaterial;
@@ -137,6 +140,7 @@ export class World {
   private winterOn: boolean | null = null;
   private swaps: { m: THREE.MeshLambertMaterial; summer: THREE.Texture | null; winter: THREE.Texture; col?: string }[] = [];
   private rod = new THREE.Group();
+  private summer = new THREE.Group(); // summer-only dressing: hidden in winter shots (it would block the low suns)
   private torch = new THREE.Group();
   private pool2!: THREE.Mesh;
   private frustum = new THREE.Frustum();
@@ -199,26 +203,27 @@ export class World {
   // ======================= TOWN =======================
   private buildTown(kit: Kit) {
     const W = this.sets.town, b = new Batch();
-    const grass = lam("grassHD", () => ({ map: grassHD() })), cob = lam("cobbleHD", () => ({ map: cobbleHD() })), dirt = lam("dirtRoad", () => ({ map: dirtTex() }));
+    const grass = lam("grassHD", () => ({ map: grassHD() })), cob = flatMat("cobbleSq", cobbleHD(), "#ffffff", 5), dirt = flatMat("dirtRoad", dirtTex(), "#ffffff", 4);
+    this.swaps.push({ m: dirt, summer: dirt.map, winter: snowTex() });
     this.swaps.push({ m: grass, summer: grass.map, winter: snowTex() });
     b.add(ground(-900, 900, -900, 900, 4), grass);
-    b.add(ground(-23, 24, -18.5, 18, 4, 0.012), cob);                       // the square
-    b.add(ground(24, 60, 6, 26, 4, 0.012), cob);                             // street east
+    b.add(ground(-23, 24, -18.5, 18, 4), cob);                              // the square
+    b.add(ground(24, 60, 6, 26, 4), cob);                                    // street east
     // the road from the square's south-west corner to the castle hill
     const dir = new THREE.Vector2(CASTLE[0], CASTLE[2]).normalize(), nrm = new THREE.Vector2(-dir.y, dir.x);
     const p0 = new THREE.Vector2(-16, 12), p1 = new THREE.Vector2(CASTLE[0], CASTLE[2]).addScaledVector(dir, -30), hw = 2.6;
-    const c = (p: THREE.Vector2, s: number) => V(p.x + nrm.x * hw * s, 0.008, p.y + nrm.y * hw * s);
+    const c = (p: THREE.Vector2, s: number) => V(p.x + nrm.x * hw * s, 0, p.y + nrm.y * hw * s);
     b.add(quad(c(p0, -1), c(p0, 1), c(p1, 1), c(p1, -1), 1, p0.distanceTo(p1) / 4), dirt);
     // houses: north row (fronts on z = -18, facing south), east row (fronts on x = 24, facing west, with a street
     // gap at z 6..26 so the winter morning sun comes in), a few on the south-east corner
     let x = -36, k = 0;
     const ws = [7, 9, 8, 7, 9, 8, 7, 9, 8], hs = [7, 8.4, 9.8, 8.4, 7, 9.8, 8.4, 7, 9.8];
-    while (x < 36) { const w = ws[k % 9]; house(b, x + w / 2, -22, 0, w, 8, hs[k % 9], k % 8); x += w + 0.3; k++; }
+    while (x + ws[k % 9] <= 23.8) { const w = ws[k % 9]; house(b, x + w / 2, -22, 0, w, 8, hs[k % 9], k % 8); x += w + 0.3; k++; }
     let z = -26;
     while (z < 6) { const w = ws[k % 9]; if (z + w > 6) break; house(b, 28, z + w / 2, -Math.PI / 2, w, 8, hs[k % 9], k % 8); z += w + 0.3; k++; }
     for (const [hx, hw2] of [[14, 7], [21.5, 7]] as const) { house(b, hx, 25, Math.PI, hw2, 8, hs[k % 9], k % 8); k++; }
     // back rows behind the north side (only roofs show)
-    for (let xx = -40; xx < 40; xx += 9.5) { house(b, xx, -34, 0, 9, 8, hs[k % 9] + 1.4, k % 8); k++; }
+    for (let xx = -36; xx < 34; xx += 9.5) { house(b, xx, -34, 0, 9, 8, hs[k % 9] + 1.4, k % 8); k++; }
     // market dressing (kept out of the low winter sun's path from the south-west)
     prop(b, kit, "stall-red", -11, 0, -13.5, 3.2, 0.15);
     prop(b, kit, "stall-green", 11.5, 0, -13.2, 3.2, -0.15);
@@ -233,14 +238,13 @@ export class World {
       const az = ((Math.atan2(tx, -tz) * 180) / Math.PI + 360) % 360, d = Math.hypot(tx, tz);
       return (az > 196 && az < 262 && d < 420) || (az > 108 && az < 142 && d < 160);
     };
-    let s = 7;
-    const r = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    for (let i = 0; i < 160; i++) {
-      const a = r() * Math.PI * 2, d = 46 + r() * 260, tx = Math.cos(a) * d, tz = Math.sin(a) * d;
-      if (corridor(tx, tz) || Math.hypot(tx - CASTLE[0], tz - CASTLE[2]) < 55) continue;
-      prop(b, kit, ["tree_oak", "tree_default", "tree_fat", "tree-high-round", "tree_cone", "tree_cone"][i % 6], tx, 0, tz, 7 + r() * 5, r() * 6);
-    }
-    prop(b, kit, "windmill", 120, 0, -150, 18, -0.6);
+    void corridor;
+    prop(b, kit, "windmill", 150, 0, -170, 18, -0.6);
+    const country = new THREE.Group();
+    for (const sw of buildCountry(country, kit, snowTex)) this.swaps.push({ m: sw.m, summer: sw.m.map, winter: sw.winter });
+    W.add(country);
+    buildSummer(this.summer, kit);
+    W.add(this.summer);
     // distant low hills all round (kept under ~2 deg seen from the square, so they never hide a low sun)
     const hill = new THREE.SphereGeometry(1, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
     const hm = [lam("hillA", () => ({ color: "#78b257" })), lam("hillB", () => ({ color: "#6aa24e" }))];
@@ -289,6 +293,9 @@ export class World {
         box(Math.min(ax, bx) - 0.45, Math.max(ax, bx) + 0.45, y, y + 1.1, Math.min(az, bz) - 0.45, Math.max(az, bz) + 0.45);
       }
     };
+    // banners hanging on the curtain wall facing the town
+    const ban = lam("wallBanner", () => ({ map: flagTex(), side: THREE.DoubleSide }));
+    for (const bx of [-10, -6.5, 6.5, 10]) b.add(quad(V(bx - 1, 3.2, 12.56), V(bx + 1, 3.2, 12.56), V(bx + 1, 8.2, 12.56), V(bx - 1, 8.2, 12.56)), ban, M(0, 0, 0));
     // curtain walls 30 x 24, 9 m high
     box(-15, 15, 0, 9, 11, 12.5); box(-15, 15, 0, 9, -12.5, -11); box(-15.5, -14, 0, 9, -12, 12); box(14, 15.5, 0, 9, -12, 12);
     merlons(-15, 12, 15, 12, 9); merlons(-15, -12, 15, -12, 9); merlons(-15, -12, -15, 12, 9); merlons(15, -12, 15, 12, 9);
@@ -377,6 +384,7 @@ export class World {
     cam.layers.enable(NOINK);
     for (const [k, g] of Object.entries(this.sets)) g.visible = k === s.set;
     this.setWinter(!!s.winter);
+    this.summer.visible = !s.winter;
     // ---- sun ----
     const sunDir = V(...sunDirOf(s));
     let torchP: V3 | null = null;
