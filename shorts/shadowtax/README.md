@@ -31,10 +31,11 @@ from the sun, length = height / tan(elevation), left out when a ray toward the s
 ## Render it (on a computer with a graphics card)
 
 ```bash
-npx remotion render src/index.ts ShadowTaxShort out/shadowtax/final.mp4 --codec h264 --crf 16 --scale 1.3333 --gl=angle
+npx remotion render src/index.ts ShadowTaxShort out/shadowtax/final.mp4 --codec h264 --crf 16 --scale 1.3333 --gl=angle --concurrency=4 --timeout=300000
 ```
 
-That's the finished 2K vertical video (1440x2560) with the final sound on it.
+That's the finished 2K vertical video (1440x2560) with the final sound on it. The world (town, countryside, castle hill) is big:
+each browser tab needs a while to build it, so keep `--concurrency=4 --timeout=300000` (the default 8 tabs / 30 s timed out).
 
 Tips:
 - Point the temp folder at a drive with space first (on this PC: `C:/remotion-tmp`).
