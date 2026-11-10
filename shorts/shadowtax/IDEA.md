@@ -28,5 +28,16 @@ A colourful fairy-tale medieval town square in the cartoon 3D style: castle on a
 (Kenney fantasy-town-kit props are in public/kenney/), a fat little king with a crown and ermine cape, a skinny tax
 collector with a measuring rod and ledger, townsfolk (baker, farmer, kids, a goose). Big readable sun positions:
 midsummer noon, winter sunset (golden light preset), an overcast day. Long dramatic shadows are the star: make sure
-the sun direction and shadows are clearly visible in every tax-day shot. No captions or labels, English only.
+the sun direction and shadows are clearly visible in every tax-day shot. English only. (Subtitles: see the preferences below.)
 Start from the lake short template (`src/videos/lake/`): shots timed to word timings.
+
+## Length and the user's latest preferences (from the Apollo 13 short)
+- Target length: about 60 s. Henry at the natural pace (pauses capped at 0.18 s, atempo 1.21x) reads ~3.3-3.5 words/s,
+  so write the script at about 200 words (Apollo 13's 62 s plan came out at 72 s).
+- Use the newest template: `src/videos/apollo13/` and `shorts/apollo13/` (voice scripts `voice/make_voice.py`,
+  `voice/make_timing.py`, sound `audio/apollo13_sound.py`).
+- One-word subtitles in the Ricks Clips look (copy `src/videos/apollo13/Captions.tsx`). This replaces the old
+  "no captions" rule.
+- No depth-of-field blur: every shot sharp (as `DOF_SCALE = 0` in the Apollo 13 story.ts).
+- An eye-catching opening in the first ~2 s (Apollo 13 rushed in from outside through a window): e.g. swoop from high
+  over the kingdom down into the town square as the hook line starts.
