@@ -2,8 +2,8 @@
 // gate, the square's fountain (stone basin, column, upper bowl, arcs of water) and the windmill (tower, cap, turning
 // sails). The Kenney pieces they replace were partial (the windmill model is only its sails, the fountain only a basin).
 import * as THREE from "three";
-import { Batch, V, lam } from "./build";
-import { ctex, stoneHD } from "./paint";
+import { Batch, V, lam, Kit, prop } from "./build";
+import { ctex, stoneHD, cobbleHD } from "./paint";
 import { twoTone } from "./shade";
 import { CASTLE, CASTLE_AZ } from "./story";
 
@@ -37,8 +37,9 @@ export type PathSwap = { m: THREE.MeshLambertMaterial; winter: THREE.Texture };
 /** flagstone path from the square's south-west corner straight up the hill to the gate, following the ground,
  *  edged with low kerb stones; returns its material so winter can swap in the snow-dusted stones */
 export const buildCastlePath = (b: Batch): PathSwap => {
-  const m = lam("castlePath_po6", () => ({ map: flagTex(false), polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -24 }));
-  const kerb = lam("kerbStone", () => ({ map: stoneHD("kerbHD", ["#d6cdbd", "#cbc1b0", "#ddd5c6", "#c4b9a6"], "#9c907e") }));
+  // the same granite setts as the market square (same texture, same 4 m uv scale), so the road reads as the square's street
+  const m = lam("castlePath_po6", () => ({ map: cobbleHD(), polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -24 }));
+  const kerb = lam("kerbStone", () => ({ map: stoneHD("kerbHD", ["#b8aa93", "#ad9f88", "#c4b6a0", "#a89a83"], "#867967") }));
   const L = Math.hypot(CASTLE[0], CASTLE[2]), ux = CASTLE[0] / L, uz = CASTLE[2] / L, nx = -uz, nz = ux, W = 2.3;
   const t0 = 18, t1 = L - 14.5, step = 1.5;
   const pos: number[] = [], uv: number[] = [];
@@ -47,8 +48,8 @@ export const buildCastlePath = (b: Batch): PathSwap => {
     const P = (tt: number, s: number) => { const x = ux * tt + nx * W * s, z = uz * tt + nz * W * s; return [x, hillY(x, z) + 0.1, z]; };
     const a0 = P(ta, -1), a1 = P(ta, 1), b1 = P(tb, 1), b0 = P(tb, -1);
     pos.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0);
-    const va = ta / 4, vb = tb / 4;
-    uv.push(0, va, 1.15, va, 1.15, vb, 0, va, 1.15, vb, 0, vb);
+    const va = ta / 4, vb = tb / 4, uw = (2 * W) / 4;
+    uv.push(0, va, uw, va, uw, vb, 0, va, uw, vb, 0, vb);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
@@ -61,7 +62,7 @@ export const buildCastlePath = (b: Batch): PathSwap => {
     for (let t = t0; t < t1; t += step) {
       const tb = Math.min(t1, t + step);
       const Q = (tt: number, off: number, up: number) => { const x = ux * tt + nx * off * sd, z = uz * tt + nz * off * sd; return [x, hillY(x, z) + 0.1 + up, z]; };
-      const i0 = Q(t, W, 0.16), o0 = Q(t, W + 0.4, 0.16), i1 = Q(tb, W, 0.16), o1 = Q(tb, W + 0.4, 0.16), g0 = Q(t, W + 0.4, -0.12), g1 = Q(tb, W + 0.4, -0.12);
+      const i0 = Q(t, W, 0.08), o0 = Q(t, W + 0.35, 0.08), i1 = Q(tb, W, 0.08), o1 = Q(tb, W + 0.35, 0.08), g0 = Q(t, W + 0.35, -0.12), g1 = Q(tb, W + 0.35, -0.12);
       kp.push(...i0, ...o0, ...o1, ...i0, ...o1, ...i1, ...o0, ...g0, ...g1, ...o0, ...g1, ...o1);
       const va = t / 2, vb = tb / 2;
       ku.push(0, va, 0.2, va, 0.2, vb, 0, va, 0.2, vb, 0, vb, 0, va, 0.15, va, 0.15, vb, 0, va, 0.15, vb, 0, vb);
@@ -70,7 +71,35 @@ export const buildCastlePath = (b: Batch): PathSwap => {
     kg.setAttribute("position", new THREE.Float32BufferAttribute(kp, 3)); kg.setAttribute("uv", new THREE.Float32BufferAttribute(ku, 2));
     kg.computeVertexNormals(); b.add(kg, kerb);
   }
-  return { m, winter: flagTex(true) };
+  void flagTex;
+  return { m, winter: m.map! }; // the setts stay clear of snow, like the square
+};
+
+/** dressing along the castle road: pines on both sides, lamp posts with warm lanterns, snowy shrubs. world.ts hides it
+ *  in the two winter-evening shots (its trees would shade the square from the low sun there). Returns the lantern glass. */
+export const buildPathDressing = (b: Batch, kit: Kit) => {
+  const L = Math.hypot(CASTLE[0], CASTLE[2]), ux = CASTLE[0] / L, uz = CASTLE[2] / L, nx = -uz, nz = ux;
+  let s = 31; const r = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  const at = (t: number, n: number): [number, number, number] => { const x = ux * t + nx * n, z = uz * t + nz * n; return [x, hillY(x, z), z]; };
+  const iron = lam("lampIron", () => ({ color: "#3a3640" }));
+  const glass = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.95, 0.8) });
+  const shrub = lam("pathShrub", () => ({ color: "#3f9a3a" }));
+  for (let t = 30; t < L - 18; t += 11) for (const sd of [-1, 1]) {
+    const [x, y, z] = at(t + (sd > 0 ? 5.5 : 0) + (r() - 0.5), sd * (6.2 + r() * 0.8));
+    prop(b, kit, "tree_cone", x, y, z, 7 + r() * 3, r() * 6);
+  }
+  for (let t = 24; t < L - 16; t += 12) for (const sd of [-1, 1]) {           // lamp posts, staggered
+    const [x, y, z] = at(t + (sd > 0 ? 6 : 0), sd * 3.1), ox = -nx * sd * 0.45, oz = -nz * sd * 0.45;
+    b.add(new THREE.CylinderGeometry(0.07, 0.1, 3.2, 8).translate(0, 1.6, 0), iron, M4(x, y, z));
+    b.add(new THREE.BoxGeometry(0.08, 0.08, 0.5).translate(0, 3.1, 0), iron, M4(x + ox * 0.5, y, z + oz * 0.5, -Math.atan2(nz, nx)));
+    b.add(new THREE.BoxGeometry(0.34, 0.42, 0.34).translate(0, 2.78, 0), glass, M4(x + ox, y, z + oz));
+    b.add(new THREE.ConeGeometry(0.3, 0.22, 4).rotateY(Math.PI / 4).translate(0, 3.1, 0), iron, M4(x + ox, y, z + oz));
+  }
+  for (let t = 22; t < L - 16; t += 3.4) for (const sd of [-1, 1]) {        // low round shrubs just past the kerbs
+    const [x, y, z] = at(t + r() * 1.2, sd * (3.9 + r() * 0.5)), k = 0.45 + r() * 0.25;
+    b.add(new THREE.IcosahedronGeometry(1, 1), shrub, M4(x, y + k * 0.6, z, r() * 6, [k, k * 0.8, k]));
+  }
+  return glass;
 };
 
 // ---------------- the fountain ----------------

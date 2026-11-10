@@ -253,18 +253,24 @@ export const buildCountry = (root: THREE.Object3D, kit: Kit, snow: () => THREE.T
   }
   // bunting along the house fronts: little triangle flags on a sagging line
   const flagCols = ["#ff3d5a", "#ffd23f", "#3fa0ff", "#3fcf5a", "#ff8a2a", "#c46bff"].map((c) => lam("flag" + c, () => ({ color: c, map: buntingTex(), side: THREE.DoubleSide })));
-  const string = (ax: number, az: number, bx: number, bz: number, y: number) => {
-    const n = Math.floor(Math.hypot(bx - ax, bz - az) / 0.7);
+  const rope = lam("buntingRope", () => ({ color: "#5a4636" })), hook = lam("buntingHook", () => ({ color: "#3a3640" }));
+  const string = (ax: number, az: number, bx: number, bz: number, y: number, y1 = y, sag = 1.2) => {
+    const n = Math.floor(Math.hypot(bx - ax, bz - az) / 0.7), yAt = (u: number) => y + (y1 - y) * u - sag * 4 * u * (1 - u);
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i <= 16; i++) { const u = i / 16; pts.push(V(ax + (bx - ax) * u, yAt(u), az + (bz - az) * u)); }
+    b.add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 32, 0.025, 5, false), rope);
+    for (const [hx, hy, hz] of [[ax, y, az], [bx, y1, bz]]) b.add(new THREE.SphereGeometry(0.07, 8, 6), hook, M4(hx, hy, hz));
     for (let i = 0; i < n; i++) {
-      const u = (i + 0.5) / n, x = ax + (bx - ax) * u, z = az + (bz - az) * u, yy = y - 1.2 * 4 * u * (1 - u), yaw = -Math.atan2(bz - az, bx - ax);
+      const u = (i + 0.5) / n, x = ax + (bx - ax) * u, z = az + (bz - az) * u, yy = yAt(u), yaw = -Math.atan2(bz - az, bx - ax);
       const g = new THREE.BufferGeometry().setFromPoints([V(-0.25, 0, 0), V(0.25, 0, 0), V(0, -0.5, 0)]);
       g.setAttribute("uv", new THREE.Float32BufferAttribute([0, 1, 1, 1, 0.5, 0], 2)); g.computeVertexNormals();
       b.add(g, flagCols[i % flagCols.length], M4(x, yy, z, yaw));
     }
   };
-  for (let x = -20; x < 20; x += 8) string(x, -17.4, x + 8, -17.4, 6.6);
-  for (let z = -16; z < 6; z += 7.3) string(23.4, z, 23.4, z + 7.3, 6.6);
-  string(-8, -17.4, 0, -10.5, 6.8); string(8, -17.4, 0, -10.5, 6.8);   // two strings down to the dais canopy
+  // along the house fronts (tied 4 cm off the walls) and two strings from the fronts down to the canopy's gold finial
+  for (let x = -20; x < 20; x += 8) string(x, -17.96, x + 8, -17.96, 6.6);
+  for (let z = -16; z + 7.3 <= 5.5; z += 7.3) string(23.96, z, 23.96, z + 7.3, 6.6); // only where the east row has walls to tie to
+  string(-8, -17.96, 0, -12.8, 6.8, 5.0, 0.6); string(8, -17.96, 0, -12.8, 6.8, 5.0, 0.6);
 
   b.build(root, false);
   return swaps;
@@ -283,11 +289,11 @@ export const buildSummer = (root: THREE.Object3D, kit: Kit) => {
   const at = (t: number, n: number): [number, number] => [ux * t + nx * n, uz * t + nz * n];
   const round = ["tree_oak", "tree_default", "tree_fat", "tree_detailed"];
   // tree avenue on both sides of the castle road
-  for (let t = 40; t < L - 52; t += 8.5) for (const sd of [-1, 1]) { const [x, z] = at(t + U(-1, 1), sd * U(6.5, 7.5)); prop(b, kit, pick(round), x, 0, z, U(7.5, 9.5), r() * 6); }
+  // (the road's own pines, lamps and shrubs live in landmarks.ts now)
   // bushes and flowers between the avenue trees
   for (let t = 34; t < L - 50; t += 3) for (const sd of [-1, 1]) {
-    const [x, z] = at(t + U(-1, 1), sd * U(4.2, 5.4));
-    prop(b, kit, r() < 0.35 ? "plant_bushLarge" : pick(["flower_redA", "flower_yellowA", "flower_purpleA"]), x, 0, z, r() < 0.35 ? U(1, 1.5) : 0.6, r() * 6);
+    const [x, z] = at(t + U(-1, 1), sd * U(4.7, 5.6));
+    prop(b, kit, pick(["flower_redA", "flower_yellowA", "flower_purpleA"]), x, 0, z, 0.6, r() * 6);
   }
   // orchards on both sides: neat rows of round fruit trees
   const fruit = lam("fruitRed", () => ({ color: "#ff3b3b" })), apple = new THREE.IcosahedronGeometry(0.22, 0);

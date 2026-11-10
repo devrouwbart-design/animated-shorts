@@ -17,7 +17,7 @@ import { TONE, CHAR, untone, twoTone } from "./shade";
 import { NOINK } from "./ink";
 import { Pool, Actor, Fx, stage, SU, Place } from "./cast";
 import { buildCountry, buildSummer, flatMat } from "./country";
-import { buildCastlePath, buildFountain, buildWindmill } from "./landmarks";
+import { buildCastlePath, buildFountain, buildWindmill, buildPathDressing } from "./landmarks";
 import {
   FPS, SHOTS, ShotDef, camAt, sunDirOf, DAIS, DAIS_TOP, CASTLE, CASTLE_AZ, HILL_H, TAB, TOY, torchAt, cloudIn, smooth, V3,
 } from "./story";
@@ -142,6 +142,8 @@ export class World {
   private swaps: { m: THREE.MeshLambertMaterial; summer: THREE.Texture | null; winter: THREE.Texture; col?: string }[] = [];
   private rod = new THREE.Group();
   private sails: THREE.Group | null = null;
+  private pathDress = new THREE.Group(); // pines, lamps, shrubs along the castle road (hidden in shots 11 + 14)
+  private lampGlass: THREE.MeshBasicMaterial | null = null;
   private summer = new THREE.Group(); // summer-only dressing: hidden in winter shots (it would block the low suns)
   private torch = new THREE.Group();
   private pool2!: THREE.Mesh;
@@ -220,6 +222,7 @@ export class World {
     const ps = buildCastlePath(lb); this.swaps.push({ m: ps.m, summer: ps.m.map, winter: ps.winter });
     this.sails = buildWindmill(lb, lg, 150, -170, Math.atan2(-150, 170));
     lb.build(lg); W.add(lg);
+    const pb = new Batch(); this.lampGlass = buildPathDressing(pb, kit); pb.build(this.pathDress); W.add(this.pathDress);
     // houses: north row (fronts on z = -18, facing south), east row (fronts on x = 24, facing west, with a street
     // gap at z 6..26 so the winter morning sun comes in), a few on the south-east corner
     let x = -36, k = 0;
@@ -399,6 +402,8 @@ export class World {
     this.setWinter(!!s.winter);
     this.summer.visible = !s.winter;
     if (this.sails) this.sails.rotation.z = -f * 0.02;
+    this.pathDress.visible = id !== 11 && id !== 14;
+    if (this.lampGlass) { const g: [number, number, number] = s.light === "golden" || s.light === "dawn" ? [5.5, 3.9, 1.8] : s.light === "overcast" ? [1.6, 1.4, 1.0] : [1.0, 0.95, 0.8]; this.lampGlass.color.setRGB(g[0], g[1], g[2]); }
     // ---- sun ----
     const sunDir = V(...sunDirOf(s));
     let torchP: V3 | null = null;
