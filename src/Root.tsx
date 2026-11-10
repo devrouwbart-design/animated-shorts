@@ -24,11 +24,12 @@ const Apollo13WithSound: React.FC = () => (
   </>
 );
 
-/** the shadow tax short with one-word subtitles (sound mix added after it is made) */
+/** the shadow tax short with one-word subtitles and its final sound mix (shorts/shadowtax/audio/mix.wav) */
 const ShadowTaxWithSound: React.FC = () => (
   <>
     <ShadowTaxShort />
     <ShadowTaxCaptions />
+    <Audio src={staticFile("shadowtax/mix.wav")} />
   </>
 );
 
