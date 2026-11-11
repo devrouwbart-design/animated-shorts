@@ -151,4 +151,9 @@ How to test a short against these rules:
     - toon.ts `Pen.quilt(pts, base, u, light, spacing = 7)` covers torsos (spacing 7) and dresses (spacing 9).
     - `Pen.stitch` draws dashed seams on belts and the front.
     - `Pen.buckle` draws a metal frame with a glint; tunics without belts get a stitched waist belt with a buckle.
-  - Not built yet: textured hair strands.
+- **K6. Textured hair.**
+  - Measured: a jagged tufted silhouette with tufts touching all along the top edge; dark strand clumps #30251f (≈ base ×0.4); warm highlight strands #fadcac on ~6 % of the hair, near the crown on the lit side; base #825d44 on the hero.
+  - Code: `LookFlags.hairTexture` (new shorts on; ShadowTax pinned off; inputProps `look.hair`).
+    - The toon.ts `"hair"` hat gets tufts every 6.5-9.5 % of head width, 2.5-6.5 % tall, swept to one side.
+    - `Pen.hairStrands` adds short uneven dark clumps plus warm highlight strands.
+  - Not covered yet: bonnet/long-hair shapes.

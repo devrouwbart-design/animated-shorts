@@ -10,6 +10,8 @@ export const INK = "#241726";
 const OUTLINE_K = lookFlags(SHADOWTAX_LOOK).charOutline;
 /** textured clothing (quilting, stitched seams, metal buckles; Ricks Clips rule K5); ShadowTax pins it off */
 const CLOTH = lookFlags(SHADOWTAX_LOOK).clothTexture;
+/** textured hair (spiky tufts, strand clumps, highlights; Ricks Clips rule K6); ShadowTax pins it off */
+const HAIR = lookFlags(SHADOWTAX_LOOK).hairTexture;
 export const SKIN = "#ffe2c2";
 const WHITE = "#ffffff";
 const MOUTH = "#5a1e28";
@@ -209,6 +211,33 @@ export class Pen {
     this.poly([[xc - 0.45 * s, yc - 0.45 * s], [xc + 0.45 * s, yc - 0.45 * s], [xc + 0.45 * s, yc + 0.45 * s], [xc - 0.45 * s, yc + 0.45 * s]], shade(metal, 0.45), 0);
     this.stroke([[xc - 0.8 * s, yc - 0.8 * s], [xc + 0.6 * s, yc - 0.8 * s]], 0.7 * u, "rgba(255,255,255,0.85)");
     this.dot(xc + 0.55 * s, yc - 0.6 * s, 0.7 * u, "#ffffff");
+  }
+  /** hair strands inside a hair shape (measured: dark clumps #30251f-ish = base x0.4, warm highlight strands #fadcac-ish
+   *  on ~6 % of the hair on the lit side). Curved strokes from the crown toward the edge; deterministic per seed. */
+  hairStrands(pts: P2[], base: string, u: number, light: number, cx: number, crown: number, seed: number) {
+    const g = this.g;
+    let x0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    const lx = Math.sign(Math.cos(light) || 1), H = y1 - crown;
+    this.clip(pts, () => {
+      g.lineCap = "round";
+      const n = Math.max(6, Math.round((x1 - x0) / (11 * u)));
+      for (let i = 0; i < n; i++) { // dark clumps: short curved strokes of uneven length starting at random depths
+        const t = (i + 0.2 + 0.6 * rnd(seed, 40 + i)) / n, x = x0 + (x1 - x0) * t, bend = (t - 0.5) * 2;
+        const sy = crown + H * (0.1 + 0.35 * rnd(seed, 50 + i)), len = H * (0.25 + 0.35 * rnd(seed, 60 + i));
+        const sx = x - bend * 3 * u, ex = x + bend * 5 * u + (rnd(seed, 70 + i) - 0.5) * 3 * u, ey = Math.min(y1 - u, sy + len);
+        this.path(curve([sx, sy], [(sx + ex) / 2 + bend * 2.5 * u, (sy + ey) / 2], [ex, ey]), false);
+        g.strokeStyle = shade(base, 0.4); g.globalAlpha = 0.6; g.lineWidth = (1.4 + rnd(seed, 80 + i) * 1.2) * u; g.stroke();
+      }
+      const m = Math.max(2, Math.round(n * 0.45));
+      for (let i = 0; i < m; i++) { // warm highlight strands near the crown, on the lit side
+        const t = 0.5 + lx * (0.08 + 0.34 * rnd(seed, 100 + i)), x = x0 + (x1 - x0) * t;
+        const sy = crown + H * (0.12 + 0.2 * rnd(seed, 120 + i)), ex = x + (t - 0.5) * 6 * u, ey = sy + H * (0.18 + 0.2 * rnd(seed, 140 + i));
+        this.path(curve([x, sy], [(x + ex) / 2 + 1.5 * u, (sy + ey) / 2], [ex, ey]), false);
+        g.strokeStyle = mix(base, "#fadcac", 0.8); g.globalAlpha = 0.9; g.lineWidth = (0.7 + 0.4 * rnd(seed, 160 + i)) * u; g.stroke();
+      }
+      g.globalAlpha = 1;
+    });
   }
   /** flat strap with a thin ink rim (cross belts, sash, rifle, handles) */
   band(pts: P2[], fill: string, w: number, rim: number, cap: CanvasLineCap = "butt") {
@@ -443,7 +472,33 @@ const hatOn = (p: Pen, o: Outfit, hp: P2[], H: Blob, cx: number, hc: number, lig
       for (let i = 1; i < 6; i++) arc.push([x0 + ((x1 - x0) * i) / 6, y0 + ((y1 - y0) * i) / 6 + (i % 2 ? 4 * u : 0)]);
     }
     const col = o.hat === "hair" || crew ? o.hair! : o.cap!;
+    if (HAIR && o.hat === "hair") { // tufted silhouette: touching, uneven tufts every ~6.5-9.5 % of head width, swept to one side
+      const sweep = (facing || (rnd(seed, 300) < 0.5 ? -1 : 1)) * 0.45;
+      const upper = (q: P2) => q[1] < cut - 10 * u;
+      const out: P2[] = [];
+      let acc = 0, next = (6.5 + 3 * rnd(seed, 301)) * u, k = 0;
+      for (let i = 0; i < arc.length; i++) {
+        const q = arc[i], r = arc[(i + 1) % arc.length];
+        out.push(q);
+        if (i === arc.length - 1 || !upper(q) || !upper(r)) { acc = 0; continue; }
+        const L = Math.hypot(r[0] - q[0], r[1] - q[1]);
+        let pos = 0;
+        while (acc + (L - pos) >= next) {
+          pos += next - acc; acc = 0; k++;
+          const t = pos / L, mx = q[0] + (r[0] - q[0]) * t, my = q[1] + (r[1] - q[1]) * t;
+          const tx = (r[0] - q[0]) / L, ty = (r[1] - q[1]) / L;
+          let nx = mx - cx, ny = my - hc; const d = Math.hypot(nx, ny) || 1; nx /= d; ny /= d;
+          const w = 0.5 * next * (0.9 + 0.2 * rnd(seed, 330 + k)), h = (2.5 + 4 * rnd(seed, 310 + k)) * u;
+          // base corners either side along the edge, tip pushed out and swept sideways
+          out.push([mx - tx * w, my - ty * w], [mx + nx * h + tx * sweep * h, my + ny * h + ty * sweep * h], [mx + tx * w * 0.4, my + ty * w * 0.4]);
+          next = (6.5 + 3 * rnd(seed, 350 + k)) * u;
+        }
+        acc += L - pos;
+      }
+      arc.splice(0, arc.length, ...out);
+    }
     p.shadedFill(arc, col, mul(col, SH_FELT), light, H.a, 0.35);
+    if (HAIR && o.hat === "hair") p.hairStrands(arc, col, u, light, cx, crown, seed);
     p.poly(arc, null, ow);
     if (crew) for (let i = -3; i <= 3; i++) p.stroke(R([[cx + i * 11 * u, crown + 7 * u], [cx + i * 11 * u, crown + 1 * u]]), 1.4 * u, shade(col, 0.7));
     if (o.hat === "hair") {
