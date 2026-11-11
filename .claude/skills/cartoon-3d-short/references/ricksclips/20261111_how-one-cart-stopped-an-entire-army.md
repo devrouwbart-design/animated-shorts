@@ -235,6 +235,8 @@ The "sun reflecting on the box" is several simple effects stacked together, not 
 - **Our cast** already has the same kinds of expressions (toon.ts FACE: lid, shock, grin, laugh, stern...). The
   measurable gaps are the outline weight and textured clothing.
   - `charOutline` 0.45 (new-short default) brings ShadowTax faces from 8.1 % to 3.3 % of head width.
+  - `clothTexture` (new-short default) adds quilting at the measured ±60° / 7 %-of-head spacing with lit ridges and a
+    sheen, stitched front seams, stitched belts and metal buckles to our cast's clothes (ShadowTax pinned off).
 
 ## 13. Where ShadowTax falls short (in order of impact)
 1. Cuts instead of one continuous camera (22 hard cuts vs 0).

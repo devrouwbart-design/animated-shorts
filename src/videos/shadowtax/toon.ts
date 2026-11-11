@@ -8,6 +8,8 @@ import { SHADOWTAX_LOOK } from "./build";
 export const INK = "#241726";
 /** character outline weight from the short's look flags (shared/look.ts; ShadowTax pins 1) */
 const OUTLINE_K = lookFlags(SHADOWTAX_LOOK).charOutline;
+/** textured clothing (quilting, stitched seams, metal buckles; Ricks Clips rule K5); ShadowTax pins it off */
+const CLOTH = lookFlags(SHADOWTAX_LOOK).clothTexture;
 export const SKIN = "#ffe2c2";
 const WHITE = "#ffffff";
 const MOUTH = "#5a1e28";
@@ -166,6 +168,47 @@ export class Pen {
     const trace = (r: P2[]) => { r.forEach(([x0, y0], i) => { const [x, y] = this.P(x0, y0); if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.closePath(); };
     g.beginPath(); trace(out); trace(inn.reverse());
     g.fillStyle = col; g.fill("evenodd");
+  }
+  /** dashed thread line (stitched seams on belts, collars, fronts): dash 2.2u, gap 1.6u, ~0.7u wide */
+  stitch(pts: P2[], u: number, col = "rgba(245,236,214,0.9)") {
+    const g = this.g; g.save(); g.setLineDash([2.2 * u, 1.6 * u]); g.lineCap = "butt";
+    this.path(pts, false); g.strokeStyle = col; g.lineWidth = 0.75 * u; g.stroke(); g.restore();
+  }
+  /** quilted fabric inside a closed shape (measured: diamond grid at +-60 deg, spacing ~7 % of head width, a thin dark
+   *  seam with a light ridge on the lit side of each seam, plus a soft sheen band on the lit side). u = 1 % head width. */
+  quilt(pts: P2[], base: string, u: number, light: number, spacing = 7) {
+    const g = this.g;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [x, y] of pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, R = Math.hypot(x1 - x0, y1 - y0) / 2 + 4 * spacing * u, sp = spacing * u;
+    const lx = Math.cos(light), ly = Math.sin(light);
+    this.clip(pts, () => {
+      for (const ang of [rad(60), rad(120)]) {
+        const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
+        // ridge offset toward the light, measured along this family's normal
+        const off = 0.9 * u * Math.sign(nx * lx + ny * ly || 1);
+        for (let k = -R; k <= R; k += sp) {
+          const a: P2 = [cx + nx * k - dx * R, cy + ny * k - dy * R], b: P2 = [cx + nx * k + dx * R, cy + ny * k + dy * R];
+          this.path([a, b], false); g.strokeStyle = shade(base, 0.62); g.globalAlpha = 0.85; g.lineWidth = 0.75 * u; g.stroke();
+          this.path([[a[0] + nx * off, a[1] + ny * off], [b[0] + nx * off, b[1] + ny * off]], false);
+          g.strokeStyle = shade(base, 1.3); g.globalAlpha = 0.45; g.lineWidth = 0.6 * u; g.stroke();
+        }
+      }
+      g.globalAlpha = 1;
+      // soft sheen down the lit side
+      const half = Math.max(x1 - x0, y1 - y0) / 2;
+      const [ax, ay] = this.P(cx + lx * half, cy + ly * half), [bx, by] = this.P(cx - lx * half, cy - ly * half);
+      const gr = g.createLinearGradient(ax, ay, bx, by);
+      gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.2, "rgba(255,255,255,0.16)"); gr.addColorStop(0.42, "rgba(255,255,255,0)");
+      this.path(pts, true); g.fillStyle = gr; g.fill();
+    });
+  }
+  /** metal buckle: frame with a light top-left edge, dark pin, white glint (reference belts and helmets) */
+  buckle(xc: number, yc: number, s: number, u: number, metal = "#c9ccd2") {
+    this.poly([[xc - s, yc - s], [xc + s, yc - s], [xc + s, yc + s], [xc - s, yc + s]], metal, 1.4 * u);
+    this.poly([[xc - 0.45 * s, yc - 0.45 * s], [xc + 0.45 * s, yc - 0.45 * s], [xc + 0.45 * s, yc + 0.45 * s], [xc - 0.45 * s, yc + 0.45 * s]], shade(metal, 0.45), 0);
+    this.stroke([[xc - 0.8 * s, yc - 0.8 * s], [xc + 0.6 * s, yc - 0.8 * s]], 0.7 * u, "rgba(255,255,255,0.85)");
+    this.dot(xc + 0.55 * s, yc - 0.6 * s, 0.7 * u, "#ffffff");
   }
   /** flat strap with a thin ink rim (cross belts, sash, rifle, handles) */
   band(pts: P2[], fill: string, w: number, rim: number, cap: CanvasLineCap = "butt") {
@@ -630,6 +673,7 @@ export const bodyFront = (p: Pen, o: Outfit, opts: FrontOpts) => {
     const D: Blob = { a: 0.5 * W * 0.98, b: 0.5 * ((sole - 0.35 * HH) - (chin - 0.2 * HH)), nTop: 2.0, nBot: 3.0, egg: 0.35, asym: 0.03 * facing, rot: 0, noise: 0.006, seed: seed + 9 };
     const dp = blobPts(300, sole - 0.35 * HH - D.b, D);
     p.gradFill(dp, o.dress!, mul(o.dress!, SH_CLOTH), light);
+    if (CLOTH) p.quilt(dp, o.dress!, u, light, 9);
     p.inkRing(dp, ow, thick);
     const Sw: Blob = { a: 0.37 * W, b: 0.3 * HH, nTop: 2.2, nBot: 2.4, egg: 0.1, asym: 0, rot: 0, noise: 0.006, seed: seed + 8 };
     const sp = blobPts(300, chin + 0.12 * HH, Sw);
@@ -637,12 +681,25 @@ export const bodyFront = (p: Pen, o: Outfit, opts: FrontOpts) => {
     p.inkRing(sp, ow * 0.9, thick);
   } else {
     p.gradFill(tp, o.jacket, mul(o.jacket, SH_CLOTH), light);
+    if (CLOTH) p.quilt(tp, o.jacket, u, light);
     p.clip(tp, () => {
       if (o.belt) {
-        for (const s of [-1, 1]) p.band([[tcx - s * 0.75 * T.a, chin - 0.05 * HH], [tcx + s * 0.8 * T.a, torsoBot - 0.1 * HH]], o.belt!, 5.5 * u, 1.8 * u);
+        for (const s of [-1, 1]) {
+          const a: P2 = [tcx - s * 0.75 * T.a, chin - 0.05 * HH], b: P2 = [tcx + s * 0.8 * T.a, torsoBot - 0.1 * HH];
+          p.band([a, b], o.belt!, 5.5 * u, 1.8 * u);
+          if (CLOTH) p.stitch([a, b], u, shade(o.belt!, 0.55));
+        }
         const xc = tcx + 0.025 * T.a, yc = chin - 0.05 * HH + (torsoBot - 0.1 * HH - (chin - 0.05 * HH)) * (0.75 / 1.55);
-        p.poly([[xc - 3.5 * u, yc - 3.5 * u], [xc + 3.5 * u, yc - 3.5 * u], [xc + 3.5 * u, yc + 3.5 * u], [xc - 3.5 * u, yc + 3.5 * u]], "#d9dde0", 1.5 * u);
+        if (CLOTH) p.buckle(xc, yc, 3.8 * u, u);
+        else p.poly([[xc - 3.5 * u, yc - 3.5 * u], [xc + 3.5 * u, yc - 3.5 * u], [xc + 3.5 * u, yc + 3.5 * u], [xc - 3.5 * u, yc + 3.5 * u]], "#d9dde0", 1.5 * u);
       }
+      if (CLOTH && !o.belt && !o.sash && !o.apron) { // waist belt with stitching and a buckle (reference tunics)
+        const yb = torsoBot - 0.3 * HH, a: P2 = [tcx - 1.3 * T.a, yb], b: P2 = [tcx + 1.3 * T.a, yb];
+        p.band([a, b], "#6b4428", 0.075 * HH, 1.6 * u);
+        p.stitch([a, b], u);
+        p.buckle(tcx + 2 * u * facing, yb, 3.6 * u, u);
+      }
+      if (CLOTH) p.stitch([[tcx - 2 * u + 2 * u * facing, chin + 0.02 * HH], [tcx - 2 * u + 2 * u * facing, torsoBot - 0.36 * HH]], u, "rgba(255,255,255,0.55)");
       if (o.zip) p.stroke([[tcx + 2 * u * facing, chin], [tcx + 2 * u * facing, torsoBot]], 1.6 * u, shade(o.jacket, 0.62));
       if (o.tie) {
         const tx = tcx + 2 * u * facing, ty = chin + 0.02 * HH;
@@ -847,8 +904,14 @@ export const bodySide = (p: Pen, o: Outfit, opts: SideOpts) => {
   else { near = swingArm(rad(-30) * nearFwd); far = mode === "march" ? swingArm(rad(30) * nearFwd) : null; }
   if (far) { p.stroke(curve(far[0], far[1], far[2]), 5.2 * u, farArm); p.dot(far[2][0], far[2][1], 5.5 * u); }
   p.gradFill(tp, o.jacket, mul(o.jacket, SH_CLOTH), light);
+  if (CLOTH) p.quilt(tp, o.jacket, u, light);
   p.clip(tp, () => {
     if (o.belt) p.band([[tcx - 0.65 * T.a, chin - 0.05 * HH], [tcx + 0.75 * T.a, torsoBot - 0.1 * HH]], o.belt!, 5.5 * u, 1.8 * u);
+    if (o.belt && CLOTH) p.stitch([[tcx - 0.65 * T.a, chin - 0.05 * HH], [tcx + 0.75 * T.a, torsoBot - 0.1 * HH]], u, shade(o.belt!, 0.55));
+    if (CLOTH && !o.belt && !o.sash) {
+      const yb = torsoBot - 0.3 * HH, a: P2 = [tcx - 1.3 * T.a, yb], b: P2 = [tcx + 1.3 * T.a, yb];
+      p.band([a, b], "#6b4428", 0.075 * HH, 1.6 * u); p.stitch([a, b], u); p.buckle(tcx + 0.55 * T.a, yb, 3.4 * u, u);
+    }
     if (o.sash) p.band([[tcx - 1.3 * T.a, torsoBot - 0.32 * HH], [tcx + 1.3 * T.a, torsoBot - 0.32 * HH]], o.sash, 0.13 * HH, 1.8 * u);
     if (!o.dress) for (let i = 0; i < 3; i++) { const y = chin + 0.16 * HH + i * 0.24 * HH; p.dot(tcx + 0.8 * T.a, y, 3 * u, INK); p.dot(tcx + 0.8 * T.a, y, 2.2 * u, o.buttons ?? shade(o.jacket, 0.7)); }
   });

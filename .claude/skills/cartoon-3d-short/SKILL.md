@@ -71,8 +71,9 @@ New shorts import these instead of copying per-short versions:
   (`NEW_SHORT_LOOK`). Read it with `lookFlags()` in build.ts (`real` → use `realMat` for world materials) and in the
   composition's post toggles (`worldInk` → InkPass on/off). Characters keep their own outline. Finished shorts pin
   their approved look (ShadowTax: `SHADOWTAX_LOOK = { real: false, worldInk: true, charOutline: 1 }`). New shorts also get
-  `charOutline: 0.45` (thinner character outlines, toon.ts `OUTLINE_K`). Override per render with inputProps
-  `{ look: { real, charOutline }, post: { ink } }`. With realMat, tone through `twoTone(m, liftFor(m.color))` so black
+  `charOutline: 0.45` (thinner character outlines, toon.ts `OUTLINE_K`) and `clothTexture: true` (quilted fabric,
+  stitched seams and buckles on clothes: toon.ts `Pen.quilt` / `stitch` / `buckle`). Override per render with inputProps
+  `{ look: { real, charOutline, cloth }, post: { ink } }`. With realMat, tone through `twoTone(m, liftFor(m.color))` so black
   stays black, and give hero props glossy fittings (`SURFACE.glossBlack` / `brass`).
 - `camera.ts`: `continuous(beats, f)` one-take camera (no hard cuts, a quick move per beat), `refEase` (the measured
   move curve, replaces smootherstep for camera glides), `holdDrift` (drifting holds), `flyBetween` (pull-back arc and

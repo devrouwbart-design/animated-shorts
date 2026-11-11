@@ -16,7 +16,7 @@ export const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
 /** this finished short keeps its approved look (toon materials + world ink). New shorts use NEW_SHORT_LOOK from
  *  src/shared/look.ts instead (realistic materials on, world ink off). Override per render with inputProps
  *  `{ look: { real: true }, post: { ink: false } }`. */
-export const SHADOWTAX_LOOK: LookFlags = { real: false, worldInk: true, charOutline: 1 };
+export const SHADOWTAX_LOOK: LookFlags = { real: false, worldInk: true, charOutline: 1, clothTexture: false };
 export const REAL_LOOK = lookFlags(SHADOWTAX_LOOK).real;
 /** surface preset from a material key / Kenney material name (roughness, wear, grime: RULES.md M1-M5) */
 const surfaceOf = (key: string): RealOpts => {

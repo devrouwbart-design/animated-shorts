@@ -11,13 +11,16 @@ export type LookFlags = {
   worldInk: boolean;
   /** character outline weight (1 = our earlier 5 % of head width; Ricks Clips measure ~2.2 % -> 0.45) */
   charOutline: number;
+  /** textured clothing on characters: quilting, stitched seams, metal buckles (Ricks Clips rule K5) */
+  clothTexture: boolean;
 };
 
 /** the default for every new short */
-export const NEW_SHORT_LOOK: LookFlags = { real: true, worldInk: false, charOutline: 0.45 };
+export const NEW_SHORT_LOOK: LookFlags = { real: true, worldInk: false, charOutline: 0.45, clothTexture: true };
 
 /** the short's defaults, overridden by inputProps when a render passes them */
 export const lookFlags = (defaults: LookFlags = NEW_SHORT_LOOK): LookFlags => {
-  const p = getInputProps() as { look?: { real?: boolean; charOutline?: number }; post?: { ink?: boolean } };
-  return { real: p.look?.real ?? defaults.real, worldInk: p.post?.ink ?? defaults.worldInk, charOutline: p.look?.charOutline ?? defaults.charOutline };
+  const p = getInputProps() as { look?: { real?: boolean; charOutline?: number; cloth?: boolean }; post?: { ink?: boolean } };
+  return { real: p.look?.real ?? defaults.real, worldInk: p.post?.ink ?? defaults.worldInk, charOutline: p.look?.charOutline ?? defaults.charOutline,
+    clothTexture: p.look?.cloth ?? defaults.clothTexture };
 };

@@ -145,4 +145,10 @@ How to test a short against these rules:
   - Code: `LookFlags.charOutline` (toon.ts `OUTLINE_K` multiplies `ow`). New shorts 0.45 → 3.3 % on our heads; ShadowTax pins 1 (8.1 %).
 - **K3. Brows act.** Thick tapered brows about 25 % of head width long, tilted up to 25-30°. Deadpan half-lidded eyes are the default face; shock = big ringed eyes about 20 % of head width each with dot pupils.
 - **K4. A new expression on almost every sentence, landing on the motivating word.** Background characters react too.
-- **K5. Realism goes into costume, not faces:** quilted or stitched fabric, belts and buckles, textured hair, metal helmets with highlights. Not built yet: a fabric-texture fill for toon.ts clothes.
+- **K5. Realism goes into costume, not faces:** quilted or stitched fabric, belts and buckles, textured hair, metal helmets with highlights.
+  - Measured quilting: diamond grid at ±60°, spacing ~7 % of head width. Each seam is a thin dark line with a light ridge on the lit side, plus a soft sheen band down the lit side. Belts have dark edges and dashed cream stitching.
+  - Code: `LookFlags.clothTexture` (new shorts on; ShadowTax pinned off; inputProps `look.cloth`).
+    - toon.ts `Pen.quilt(pts, base, u, light, spacing = 7)` covers torsos (spacing 7) and dresses (spacing 9).
+    - `Pen.stitch` draws dashed seams on belts and the front.
+    - `Pen.buckle` draws a metal frame with a glint; tunics without belts get a stitched waist belt with a buckle.
+  - Not built yet: textured hair strands.
