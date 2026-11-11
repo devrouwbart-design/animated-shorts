@@ -58,6 +58,13 @@ re-test a still before keeping any version change. `npm run typecheck` shows 6 h
   checking where sounds land. Its studio and renders run separately from Remotion (`hyperframes init <dir>` makes
   its own project folder; keep those under `hyperframes/<name>/`). The cartoon 3D shorts themselves stay in Remotion.
 
+## Learning from Ricks Clips (read before every new short)
+The user's main style reference is the YouTube channel Ricks Clips (@RicksClips3000). Before planning a new short,
+read `references/ricksclips/RULES.md` (concrete measured rules) if it exists, and apply them. To study a new video of
+theirs, follow `references/ricksclips/STUDY_GUIDE.md`: download on the user's computer with yt-dlp (cloud sessions
+cannot reach YouTube), measure every frame at 30 fps with `scripts/analyze_reference.py`, then write the findings and
+rules into `references/ricksclips/`. Their videos and frames are private study material and never go into git.
+
 ## Second example: the lake short (start new shorts from this one)
 **The Lake That Went Down the Drain** (Lake Peigneur 1980, 70 s, 23 shots, 3 sets) is the newer, more general template.
 Prefer copying it over the bridge when a story needs several places or water.
