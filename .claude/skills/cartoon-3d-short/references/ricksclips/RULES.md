@@ -42,7 +42,7 @@ How to test a short against these rules:
 - **M1. Every prop material has roughness and a sun highlight.**
   - Measured: stone 0.82, raw wood 0.72, painted wood 0.45, iron 0.35 (metal), cloth 0.92, wet 0.22. Values are judged from highlight size on full-resolution frames.
   - Code: `realMat(params, SURFACE.<kind>, twoTone)` keeps the short's two-tone palette and adds GGX specular masked by the shadow.
-  - ShadowTax opt-in: inputProps `{look:{real:true}}` → build.ts `REAL_LOOK` / `surfaceOf(key)`.
+  - **Default ON for new shorts** (`NEW_SHORT_LOOK` in src/shared/look.ts, user's choice 2026-11-11). Wiring example: ShadowTax build.ts `REAL_LOOK` / `surfaceOf(key)` (pinned off there).
 - **M2. Wear at the scale of one piece.**
   - Measured: neighbouring blocks/planks differ about ±10 % in value.
   - Code: `wear` (±17 % at 1) with `wearScale` ≈ one piece (stone 0.45 m, wood 0.35 m); per-block vertex tone in `blockWall({ jitter: 0.14 })`.
@@ -74,8 +74,8 @@ How to test a short against these rules:
   - Code: `SHOTS[].light`.
 - **L3. No world ink.**
   - Measured: thin near-black lines 0.77 % of pixels (almost all character outlines). ShadowTax: 1.98 %; with world ink off: 1.08 %.
-  - Code: `post.ink` toggle (ShadowTax.tsx `toggles`) / ink.ts. Characters keep their own outline.
-  - Open: ink is the proven look of our earlier reference; switch it off per short only with the user's OK.
+  - **Default OFF for new shorts** (`NEW_SHORT_LOOK.worldInk = false`, user's choice 2026-11-11). Characters keep their own outline.
+  - Code: `lookFlags().worldInk` feeds the composition's ink toggle (see ShadowTax.tsx `toggles`); override with inputProps `post.ink`.
 - **L4. Night = cool ambient + warm emissive.** Blue-violet shade, warm lanterns with bloom (threshold 1.0, as in the post chain).
 
 ## Detail and depth

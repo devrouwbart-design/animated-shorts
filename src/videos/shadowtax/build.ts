@@ -6,16 +6,18 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { D0 } from "./story";
 import { brick, rng, ctex, rep, facadeHD, roofHD, stoneHD } from "./paint";
 import { twoTone } from "./shade";
-import { getInputProps } from "remotion";
+import { lookFlags, type LookFlags } from "../../shared/look";
 import { realMat, SURFACE, type RealOpts } from "../../shared/realMaterial";
 
 export type Kit = Record<string, THREE.Object3D>;
 export const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
 // ---------------- materials (shared, cached) ----------------
-/** Ricks Clips "real" look (src/shared/realMaterial.ts): opt-in per render with inputProps `{ look: { real: true } }`.
- *  Off by default, so the finished short renders exactly as before. */
-export const REAL_LOOK = !!(getInputProps() as { look?: { real?: boolean } }).look?.real;
+/** this finished short keeps its approved look (toon materials + world ink). New shorts use NEW_SHORT_LOOK from
+ *  src/shared/look.ts instead (realistic materials on, world ink off). Override per render with inputProps
+ *  `{ look: { real: true }, post: { ink: false } }`. */
+export const SHADOWTAX_LOOK: LookFlags = { real: false, worldInk: true };
+export const REAL_LOOK = lookFlags(SHADOWTAX_LOOK).real;
 /** surface preset from a material key / Kenney material name (roughness, wear, grime: RULES.md M1-M5) */
 const surfaceOf = (key: string): RealOpts => {
   if (/iron|hoop|lamp|hook|chain|gold/i.test(key)) return SURFACE.metal;

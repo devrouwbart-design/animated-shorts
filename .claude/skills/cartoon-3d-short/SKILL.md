@@ -67,12 +67,17 @@ rules into `references/ricksclips/`. Their videos and frames are private study m
 
 ## Shared look code (src/shared/, from the Ricks Clips study; rules in references/ricksclips/RULES.md)
 New shorts import these instead of copying per-short versions:
+- `look.ts`: **default for every new short (user's choice, 2026-11-11): realistic materials ON, world ink OFF**
+  (`NEW_SHORT_LOOK`). Read it with `lookFlags()` in build.ts (`real` → use `realMat` for world materials) and in the
+  composition's post toggles (`worldInk` → InkPass on/off). Characters keep their own outline. Finished shorts pin
+  their approved look (ShadowTax: `SHADOWTAX_LOOK = { real: false, worldInk: true }`). Override per render with
+  inputProps `{ look: { real }, post: { ink } }`.
 - `camera.ts`: `continuous(beats, f)` one-take camera (no hard cuts, a quick move per beat), `refEase` (the measured
   move curve, replaces smootherstep for camera glides), `holdDrift` (drifting holds), `flyBetween` (pull-back arc and
   roll mid-move), `openingBeats` (the measured opening), `pushPct`. Same `Cam` type as story.ts.
 - `realMaterial.ts`: `realMat(params, SURFACE.stone | woodRaw | woodPainted | metal | cloth | wet, twoTone)`: roughness,
   sun specular, sky sheen, wear and base grime added on top of the short's two-tone shading. `REAL.uRealSky` is set per
-  light in world.ts. In ShadowTax it is opt-in (`inputProps {look:{real:true}}`, build.ts `REAL_LOOK`).
+  light in world.ts. ShadowTax shows the wiring (build.ts `REAL_LOOK` / `surfaceOf(key)`), pinned off there.
 - `bevel.ts`: `roundedBox`, `roundedBoxBetween` (drop-in for `boxGeo`), `plank`, `blockWall` (separate bevelled
   blocks + recessed mortar, per-block tone in vertex colours: use a material with `vertexColors: true`; the `Batch`
   merger drops vertex colours, so add walls as their own meshes).
@@ -161,6 +166,8 @@ belongs on the user's computer: `npx remotion render src/index.ts <Comp> out/<na
    - `cast.ts`: camera-facing billboards, crowds, effect cards, blinks, walk cycles. All billboards go on the `NOINK` layer.
    - `cardshade.ts`: cards lit by the scene light, no emissive.
 7. **Post** (`Bridge.tsx` + `ink.ts` + `lensblur.ts` + `grade.ts`).
+   - New shorts: world ink OFF by default (`NEW_SHORT_LOOK`, Ricks Clips rule L3); the ink values below apply only
+     when a short turns it back on.
    - Composer order: ink → lens pre → lens main → bloom → NEUTRAL tone map → grade (MSAA 4).
    - Every pixel parameter scales with output height / 1920.
 8. **Sound** (`audio/` of this project, copy per short to `shorts/<name>/audio/`: timeline.py, sfx_gen.py, sfx.py, music.py, instruments.py, dsp.py, mix.py).
