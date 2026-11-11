@@ -15,6 +15,7 @@ import { ctex, cloudHD, cobbleHD, grassHD, stoneHD, planksHD, roofHD } from "./p
 import { LIGHTS, LOOK, Light } from "./lights";
 import { TONE, CHAR, untone, twoTone } from "./shade";
 import { NOINK } from "./ink";
+import { REAL } from "../../shared/realMaterial";
 import { Pool, Actor, Fx, stage, SU, Place } from "./cast";
 import { buildCountry, buildSummer, flatMat } from "./country";
 import { buildCastlePath, buildFountain, buildWindmill, buildPathDressing } from "./landmarks";
@@ -411,6 +412,7 @@ export class World {
     const overcast = s.light === "overcast";
     if (this.sun.castShadow === overcast) this.sun.castShadow = !overcast;
     this.hemi.color.set(L.sky); this.hemi.groundColor.set(L.ground); this.hemi.intensity = L.hemiI;
+    REAL.uRealSky.value.set(L.sky); // sky reflection colour of the opt-in real look (shared/realMaterial.ts)
     this.sun.color.set(L.sunCol); this.sun.intensity = L.sunI;
     let center = focus.clone(), Rr = THREE.MathUtils.clamp(dist * 1.15 + 7, 12, 120);
     if (table) { center = V(...TOY); Rr = 0.9; }

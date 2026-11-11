@@ -6,11 +6,28 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { D0 } from "./story";
 import { brick, rng, ctex, rep, facadeHD, roofHD, stoneHD } from "./paint";
 import { twoTone } from "./shade";
+import { getInputProps } from "remotion";
+import { realMat, SURFACE, type RealOpts } from "../../shared/realMaterial";
 
 export type Kit = Record<string, THREE.Object3D>;
 export const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
 // ---------------- materials (shared, cached) ----------------
+/** Ricks Clips "real" look (src/shared/realMaterial.ts): opt-in per render with inputProps `{ look: { real: true } }`.
+ *  Off by default, so the finished short renders exactly as before. */
+export const REAL_LOOK = !!(getInputProps() as { look?: { real?: boolean } }).look?.real;
+/** surface preset from a material key / Kenney material name (roughness, wear, grime: RULES.md M1-M5) */
+const surfaceOf = (key: string): RealOpts => {
+  if (/iron|hoop|lamp|hook|chain|gold/i.test(key)) return SURFACE.metal;
+  if (/stone|plinth|kerb|ring|trim|fountain|castle|tower|chim|wall|cobble|path|plaster|mill$|mills|chapel/i.test(key)) return SURFACE.stone;
+  if (/wood|plank|crate|barrel|fence|beam|pole|planter|post|dais/i.test(key)) return SURFACE.woodRaw;
+  if (/banner|flag|canopy|wool|bunting|paper|cloth|rope/i.test(key)) return SURFACE.cloth;
+  if (/roof/i.test(key)) return { roughness: 0.7, spec: 0.7, wear: 0.7, wearScale: 0.5, grime: 0.15, sky: 0.12 };
+  if (/grass|hill|leaf|hedge|shrub|bloom|bark|straw|g[A-Z]|fruit|mound|skirt/i.test(key)) return { roughness: 0.85, spec: 0.35, wear: 0.6, wearScale: 1.6, grime: 0.25, sky: 0 };
+  return { roughness: 0.6 };
+};
+const toneStd = <M extends THREE.MeshStandardMaterial>(m: M) => twoTone(m as unknown as THREE.MeshLambertMaterial) as unknown as M;
+const realOf = (key: string, p: THREE.MeshLambertMaterialParameters) => realMat(p as THREE.MeshStandardMaterialParameters, surfaceOf(key), toneStd) as unknown as THREE.MeshLambertMaterial;
 const mats = new Map<string, THREE.Material>();
 /** materials whose Strands are built as real interlocking chain links (MAT pass) instead of a textured box tube */
 const CHAIN_MATS = new WeakSet<THREE.Material>();
@@ -23,7 +40,7 @@ export const lam = (key: string, make: () => THREE.MeshLambertMaterialParameters
       const c = twoTone(new THREE.MeshPhongMaterial({ color: "#7a8490", specular: "#6c727b", shininess: 30 }));
       CHAIN_MATS.add(c);
       m = c as unknown as THREE.MeshLambertMaterial;
-    } else m = twoTone(new THREE.MeshLambertMaterial(make()));
+    } else m = REAL_LOOK ? realOf(key, make()) : twoTone(new THREE.MeshLambertMaterial(make()));
     mats.set(key, m);
   }
   return m;
@@ -39,7 +56,8 @@ const toLambert = (m: THREE.Material) => {
   if (!l) {
     const s = m as THREE.MeshStandardMaterial;
     const col = m.name === "leafsGreen" ? GREENS[lamOf.size % 3] : RECOLOR[m.name];
-    l = twoTone(new THREE.MeshLambertMaterial({ color: col ? new THREE.Color(col) : s.color?.clone() ?? new THREE.Color("#ffffff"), map: s.map ?? null, side: s.side, alphaTest: s.alphaTest }));
+    const p = { color: col ? new THREE.Color(col) : s.color?.clone() ?? new THREE.Color("#ffffff"), map: s.map ?? null, side: s.side, alphaTest: s.alphaTest };
+    l = REAL_LOOK ? realOf(m.name, p) : twoTone(new THREE.MeshLambertMaterial(p));
     lamOf.set(m.uuid, l);
   }
   return l;

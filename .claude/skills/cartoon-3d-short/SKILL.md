@@ -16,7 +16,7 @@ The style reference is a channel studied privately (`references/`: STYLE_BIBLE.m
 - Never say the channel's name in a voice-over or description.
 
 User rules that apply:
-- No captions or labels in the video.
+- Captions: only one-word subtitles from `src/shared/Captions.tsx` (used since Apollo 13). No other labels or on-screen text.
 - English only.
 - Voice: one steady tone.
 - Jokes are researched real facts.
@@ -64,6 +64,21 @@ read `references/ricksclips/RULES.md` (concrete measured rules) if it exists, an
 theirs, follow `references/ricksclips/STUDY_GUIDE.md`: download on the user's computer with yt-dlp (cloud sessions
 cannot reach YouTube), measure every frame at 30 fps with `scripts/analyze_reference.py`, then write the findings and
 rules into `references/ricksclips/`. Their videos and frames are private study material and never go into git.
+
+## Shared look code (src/shared/, from the Ricks Clips study; rules in references/ricksclips/RULES.md)
+New shorts import these instead of copying per-short versions:
+- `camera.ts`: `continuous(beats, f)` one-take camera (no hard cuts, a quick move per beat), `refEase` (the measured
+  move curve, replaces smootherstep for camera glides), `holdDrift` (drifting holds), `flyBetween` (pull-back arc and
+  roll mid-move), `openingBeats` (the measured opening), `pushPct`. Same `Cam` type as story.ts.
+- `realMaterial.ts`: `realMat(params, SURFACE.stone | woodRaw | woodPainted | metal | cloth | wet, twoTone)`: roughness,
+  sun specular, sky sheen, wear and base grime added on top of the short's two-tone shading. `REAL.uRealSky` is set per
+  light in world.ts. In ShadowTax it is opt-in (`inputProps {look:{real:true}}`, build.ts `REAL_LOOK`).
+- `bevel.ts`: `roundedBox`, `roundedBoxBetween` (drop-in for `boxGeo`), `plank`, `blockWall` (separate bevelled
+  blocks + recessed mortar, per-block tone in vertex colours: use a material with `vertexColors: true`; the `Batch`
+  merger drops vertex colours, so add walls as their own meshes).
+- `Captions.tsx`: `<Captions words={CAPS} />`, the measured subtitle style and word grouping.
+- Test scene: composition `LookLab` (`src/videos/looklab/`), before/after with `PROPS='{"variant":"before"}'`.
+- Highlights only show on edges: pair realMat with bevelled geometry, and light hero props from the side.
 
 ## Second example: the lake short (start new shorts from this one)
 **The Lake That Went Down the Drain** (Lake Peigneur 1980, 70 s, 23 shots, 3 sets) is the newer, more general template.
@@ -128,7 +143,9 @@ belongs on the user's computer: `npx remotion render src/index.ts <Comp> out/<na
    - `SHOTS`: id, a/b frames, light day/golden, crowd mode, `tau` story time.
    - `XFADE`: crossfades at place/time changes.
    - `FLASH_AT`: a white flash after the hook.
-   - `CAMS`: per-shot keys `{f, dur?, cut?, s: f => {pos, look, fov, roll}}`.
+   - `CAMS`: per-shot keys `{f, dur?, cut?, s: f => {pos, look, fov, roll}}`. New shorts: build the camera as ONE
+     `continuous()` beat list from `src/shared/camera.ts` (Ricks Clips: 0 hard cuts, ~4.8 moves per 10 s, holds ~0.8 s,
+     moves ~24 f with `refEase`), and keep SHOTS only for light/set/story state.
    - `KICKS`: impact flip-shakes.
    - `DOF`/`dofAt`: lens blur per beat.
    - `FOREGROUND`: near framing props.
@@ -150,7 +167,9 @@ belongs on the user's computer: `npx remotion render src/index.ts <Comp> out/<na
    - Event table → synthesized SFX plus an original score ducked under the voice.
    - Output: mix.wav (48 kHz, exact length), stems and cues.md.
    - Lock the picture's time constants before the sound is made. Any later timing change means re-running the sound.
-9. **Look checks.** Run `node scripts/bridge-stills.mjs out/<name>/x_ 100,400 0.5`.
+9. **Look checks.** Run `node scripts/stills.mjs <Comp> out/<name>/x_ 100,400 0.5` (`PROPS='{...}'` passes inputProps for A/B).
+   - Numbers vs the reference: `python scripts/frame_metrics.py "ours=out/<name>/x_*.jpg" "ref=out/cmp/refs/r_*.jpg"`
+     (ink share, edges, colourfulness, DOF ratio; targets in references/ricksclips/RULES.md).
    - Set `BRIDGE_ENTRY=src/sandboxes/<n>/index.tsx` to render a sandbox copy.
    - Make side-by-sides against reference frames with `python scripts/sbs_sheet.py out.jpg --ours ... --ref ...`.
    - Send them to an Opus max verifier: 1-3 images, a ≤200-word verdict.
