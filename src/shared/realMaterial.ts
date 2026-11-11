@@ -46,7 +46,7 @@ export const SURFACE = {
   wet: { roughness: 0.22, spec: 1.4, wear: 0.3, wearScale: 0.8, grime: 0.2, sky: 0.7 },
 } satisfies Record<string, RealOpts>;
 
-const NOISE = /* glsl */ `
+export const NOISE_GLSL = /* glsl */ `
 float rHash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
 float rNoise(vec3 x) {
   vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -76,7 +76,7 @@ export function realify<T extends THREE.MeshStandardMaterial>(m: T, opts: RealOp
   #endif
     vRealW = (modelMatrix * rw).xyz; }`);
     sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", `#include <common>\nvarying vec3 vRealW;\nuniform vec3 uRealSky;\n${NOISE}`)
+      .replace("#include <common>", `#include <common>\nvarying vec3 vRealW;\nuniform vec3 uRealSky;\n${NOISE_GLSL}`)
       // wear: two octaves, the big one about one piece wide, so neighbouring blocks / planks differ in tone
       .replace("#include <color_fragment>", `#include <color_fragment>
   float rWa = rNoise(vRealW / ${f(o.wearScale)}), rWb = rNoise(vRealW / ${f(o.wearScale * 0.23)});

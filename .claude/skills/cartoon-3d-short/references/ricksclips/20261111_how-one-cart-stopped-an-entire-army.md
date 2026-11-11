@@ -160,7 +160,32 @@ Per story beat:
   explosion behind: punchline on the last word, no loop line.
 - Something new every ~1.4 s: camera move, expression change or effect.
 
-## 10. Where ShadowTax falls short (in order of impact)
+## 10. Nature: grass, trees, ground
+Their nature looks real because the detail is spent where the lens is. Far away it is simple.
+- **Near grass is hero-level geometry.**
+  - Thousands of thin blades: tapered, curved, flopping every way.
+  - Dark at the roots, yellow-green at the lit tips, with a few dry yellow blades.
+  - Tall enough to hide the characters' feet and the bottoms of props.
+  - Grass sits in the foreground of most outdoor shots.
+- **Measured on 4 near-grass close-ups (bottom of the frame, 540-wide scale):**
+  - hue 84-107°, saturation 0.56-0.63, mean value 0.28-0.70
+  - value p5 → p95 spans 2.5-4.3x (deep shade between clumps against bright tips)
+  - fine-detail energy 7-10
+- **Mid-distance:** fields are flat colour patches with stripe textures; hillsides are green with darker noise
+  patches (woods) and lighter ones (meadow). Haze and depth of field soften everything past the subject.
+- **Trees are simple:**
+  - Faceted low-poly blobs (round) or stacked cones (pine), never outlined.
+  - Every tree is shaded: lit top in yellow-green, mid green, dark green underside and core.
+  - Shadows on the ground under every tree.
+- **ShadowTax / our current meadow (NatureLab "before" = shadowtax grassHD texture + cartoon trees):**
+  - Saturation 0.99, value range 1.1x (flat), fine detail 1.3-2.5.
+  - The trees are ink-outlined teal ball stacks with a two-tone flat shade.
+- **Shared helpers (src/shared/nature.ts, NatureLab "after"):**
+  - Measured result: saturation 0.60-0.65, value 0.49-0.51, range 1.5-1.8x, fine detail 8.8-10.1.
+  - Saturation, value and fine detail now sit inside the reference ranges.
+  - The value range is still low: the rest of theirs comes from cast shadows inside the turf and DOF.
+
+## 11. Where ShadowTax falls short (in order of impact)
 1. Cuts instead of one continuous camera (22 hard cuts vs 0).
 2. Flat ink-lined world vs bevelled, textured, specular props (ink 2.6x theirs; no bevels; no wear or grime).
 3. Over-saturated, over-bright palette (colourfulness 85 vs 59, luma 0.64 vs 0.45).
@@ -168,3 +193,4 @@ Per story beat:
 5. Foreground detail: open cobble planes vs grass blades and props at the lens.
 6. Captions 15 % too big, outline 3x too heavy, tiny words flashing (fixed in shared Captions).
 7. One light per stretch of story; theirs changes time of day on beats (ShadowTax does change light, mostly by shot).
+8. Nature: painted flat grass and outlined ball trees vs 3D blades at the lens and shaded low-poly trees (section 10).

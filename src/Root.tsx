@@ -7,6 +7,7 @@ import { Captions as Apollo13Captions } from "./videos/apollo13/Captions";
 import { ShadowTaxShort, SHADOWTAX_FRAMES } from "./videos/shadowtax/ShadowTax";
 import { Captions as ShadowTaxCaptions } from "./videos/shadowtax/Captions";
 import { LookLab, LOOKLAB_FRAMES } from "./videos/looklab/LookLab";
+import { NatureLab, NATURELAB_FRAMES } from "./videos/looklab/NatureLab";
 
 /** the lake short with its final sound mix (voice + music + effects, shorts/lake/audio/mix.wav) */
 const LakeWithVoice: React.FC = () => (
@@ -42,6 +43,7 @@ export const Root: React.FC = () => (
     <Composition id="ShadowTaxShort" component={ShadowTaxWithSound} durationInFrames={SHADOWTAX_FRAMES} fps={30} width={1080} height={1920} />
     {/* test scene for the shared look code (src/shared), before/after via inputProps { variant } */}
     <Composition id="LookLab" component={LookLab} durationInFrames={LOOKLAB_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="NatureLab" component={NatureLab} durationInFrames={NATURELAB_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="LakeShort" component={LakeWithVoice} durationInFrames={LAKE_FRAMES} fps={30} width={1080} height={1920} />
   </>
 );

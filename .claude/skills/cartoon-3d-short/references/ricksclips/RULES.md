@@ -87,6 +87,26 @@ How to test a short against these rules:
 - **D3. Detail is texture and form, not lines.**
   - Edge density target ≈ 0.10 (ShadowTax 0.14) while fine detail stays high.
 
+## Nature (src/shared/nature.ts; test scene NatureLab)
+- **N1. 3D grass blades wherever the lens is near the ground.**
+  - Measured: near grass hides the feet. Hue 84-107°, saturation ~0.58, value range 2.5-4.3x, fine detail 7-10.
+  - Code: `grassPatch({ center, radius ≈ 7, density 1500-2000, height [0.22, 0.5] })`.
+  - Our painted grass texture: saturation 0.99, range 1.1x, fine detail 1.3-2.5. New blades: 0.60-0.65, 1.5-1.8x, 8.8-10.1.
+- **N2. No visible grass edge.**
+  - Ring the near patch with a sparse, shorter, wider band: `grassPatch({ radius 20+, density ~160, height [0.12, 0.28], width 0.03, edge 0.3 })`.
+  - Put `meadowMat()` underneath, which uses the same colours as the blades.
+- **N3. Blades are dark at the root and lit at the tip, with clumps.**
+  - Code: grassMaterial root ×0.2 → tip ×1.25 with a yellow tip shift; `clump` 0.6 darkens tufts ~0.6 m across; 8 % dry blades.
+  - Set `GRASS.uTime.value = frame / fps` every frame for the wind.
+- **N4. Far nature stays simple.**
+  - Trees: `natureTree({ height, kind: "round" | "pine" })`, faceted with baked top-lit / dark-underside shading.
+  - No ink on trees, ever (`NOINK` layer if a short keeps world ink).
+  - Greens `TREE_COLS`: lit #86b84a, mid #56903a, shade #33602a.
+- **N5. Ground in big patches.**
+  - `meadowMat()`: light and dark green at ~9 m, dry patches at ~3 m, fine tone at ~1 m.
+  - No visible texture tiling: the old grassHD repeats every 4 m.
+- **N6. Side or back light on grass and trees** so tips and canopy tops catch the sun (NatureLab sun ~120° off the lens axis).
+
 ## Subtitles (src/shared/Captions.tsx)
 - **S1. Position:** centre 70 % down, centred. Code: `CAPTION_STYLE.top = 0.7`.
 - **S2. Size:** capital height 52 px at 1080x1920. Code: `fontPx: 72` (Arial Black). ShadowTax used 84.

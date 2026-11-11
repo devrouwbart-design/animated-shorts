@@ -82,7 +82,11 @@ New shorts import these instead of copying per-short versions:
   blocks + recessed mortar, per-block tone in vertex colours: use a material with `vertexColors: true`; the `Batch`
   merger drops vertex colours, so add walls as their own meshes).
 - `Captions.tsx`: `<Captions words={CAPS} />`, the measured subtitle style and word grouping.
-- Test scene: composition `LookLab` (`src/videos/looklab/`), before/after with `PROPS='{"variant":"before"}'`.
+- `nature.ts`: `grassPatch` (instanced 3D blades near the lens + a sparse outer band), `meadowMat` (patchy ground in
+  the blade colours), `natureTree` (shaded low-poly round/pine trees, no ink). Set `GRASS.uTime.value = f / fps` per
+  frame. Test scene: composition `NatureLab`. Use these for every outdoor short instead of the painted grassHD texture
+  and the outlined ball trees.
+- Test scenes: compositions `LookLab` and `NatureLab` (`src/videos/looklab/`), before/after with `PROPS='{"variant":"before"}'`.
 - Highlights only show on edges: pair realMat with bevelled geometry, and light hero props from the side.
 
 ## Second example: the lake short (start new shorts from this one)
