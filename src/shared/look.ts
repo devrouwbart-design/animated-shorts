@@ -18,7 +18,8 @@ export type LookFlags = {
 };
 
 /** the default for every new short */
-export const NEW_SHORT_LOOK: LookFlags = { real: true, worldInk: false, charOutline: 0.45, clothTexture: true, hairTexture: true };
+/** charOutline 1: the user prefers our original thick character outlines (2026-11-11), not the reference's thin ones */
+export const NEW_SHORT_LOOK: LookFlags = { real: true, worldInk: false, charOutline: 1, clothTexture: true, hairTexture: true };
 
 /** the short's defaults, overridden by inputProps when a render passes them */
 export const lookFlags = (defaults: LookFlags = NEW_SHORT_LOOK): LookFlags => {

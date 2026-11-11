@@ -241,7 +241,24 @@ The "sun reflecting on the box" is several simple effects stacked together, not 
     #fadcac on ~6 % of the hair near the crown. `hairTexture` (new-short default) gives our `"hair"` hat touching, swept
     tufts, short dark clumps and warm highlights.
 
-## 13. Where ShadowTax falls short (in order of impact)
+## 13. Light sources (lanterns, torches, sparks)
+Measured on the night frame (33.4 s, 1080x1920):
+- **Blown-out core:** the whole lantern face is clipped warm white.
+  - Square wall lantern: #fefbed, L 1.0, core radius 39 px.
+  - Round hanging lantern: core radius 31 px, L 0.96.
+  - A saturated orange rim sits at the edge of the core.
+- **Halo:** L 0.96 inside the core, 0.65-0.68 just outside, 0.39-0.45 at 1.5x the core radius, then ambient (0.26-0.28) by 2x the core radius.
+- **Spill:** nearby walls, columns and rafters are lit warm orange (#654238 around the wall lantern) against a blue-violet night.
+- **Contrast:** scene median luma 0.22, so the light sources are ~4.6x the median (p99.8 / p50). Faces stay bright (K1).
+- **Shafts:** a soft cone of light under hanging lanterns in the rain. By day, a light shaft through the gate arch.
+- **By day:** torch flames and sparks still bloom (HDR); lanterns read as warm glows.
+- **What we built:** `src/shared/glow.ts`.
+  - `lantern()`: an HDR body (hot white centre with an orange rim) that the bloom picks up, plus caps and a tassel, an additive halo sprite, a warm PointLight and an optional light cone.
+  - `torchFlame()`: a drawn teardrop flame that flickers deterministically per frame.
+  - `addSpill()`: lets point lights reach materials whose two-tone shading only listens to the sun.
+  - ArmyFrame `time: "dusk"` result: median 0.27, lanterns 3.8x (reference 0.22, 4.6x). Warm pools on the wall and tower front.
+
+## 14. Where ShadowTax falls short (in order of impact)
 1. Cuts instead of one continuous camera (22 hard cuts vs 0).
 2. Flat ink-lined world vs bevelled, textured, specular props (ink 2.6x theirs; no bevels; no wear or grime).
 3. Over-saturated, over-bright palette (colourfulness 85 vs 59, luma 0.64 vs 0.45).
@@ -252,3 +269,4 @@ The "sun reflecting on the box" is several simple effects stacked together, not 
 8. Nature: painted flat grass and outlined ball trees vs 3D blades at the lens and shaded low-poly trees (section 10).
 9. Character outlines 3x too heavy; clothes flat colour instead of textured (section 12).
 10. Shade turns warm surfaces mauve; black parts go navy (fixed lift); no glossy fittings to catch the sun (section 11).
+11. Light sources: no HDR glow, halo or spill on surfaces; night scenes not dark enough for lanterns to pop (section 13).

@@ -115,6 +115,27 @@ How to test a short against these rules:
   - No visible texture tiling: the old grassHD repeats every 4 m.
 - **N6. Side or back light on grass and trees** so tips and canopy tops catch the sun (NatureLab sun ~120° off the lens axis).
 
+## Light sources (src/shared/glow.ts)
+- **E1. Light sources are blown out.** The core is clipped warm white (L ≥ 0.96) with a saturated orange rim.
+  - Code: `lantern({ hot })`, HDR body; hot 3 by day, 8-9 at dusk or night.
+  - Render through EffectComposer: renderer tone mapping off, bloom, then ToneMappingEffect.
+- **E2. Halo about one core radius wide.** Bloom on HDR only (threshold 1.0 at night, intensity ~0.9) plus `halo` sprite 2.4-2.8x the lantern size.
+- **E3. Warm spill on nearby surfaces.**
+  - Code: lantern PointLight (`light` 4 day / 14 dusk, `reach` 6-8 m).
+  - Run `addSpill()` on every lit material; twoTone otherwise ignores point lights.
+- **E4. Night must be dark for lights to pop.**
+  - Scene median luma ~0.22 (ours 0.27); light sources ~4.6x the median.
+  - Blue-violet ambient: shade ≈ [.2,.2,.36], lit ≈ [.85,.55,.42], hemi 0.25. Faces stay bright (K1).
+- **E5. Flames are shapes, not discs.** Teardrop with a white core low in the flame, yellow body, orange tongue, red edge (`torchFlame`). Light cones under hanging lanterns at night (`cone`).
+
+## Buildings (from the army example frame)
+- **B1. Roofs are built, not painted.**
+  - 3D roll tiles every ~0.42 m with round tile ends; a thick slab with a fascia board and a rafter underside.
+  - Concave slopes (y = H(1-t)^1.7) and eaves rising gradually to the corners.
+  - A layered main ridge with curled end ornaments; heavy hip ridges with small figurines and corner bells.
+  - Code: ArmyFrame `curvedRoof()`.
+- **B2. Detail lives at the top.** Painted beam bands, double bracket rows, a name plaque, fret-pattern lattice, lanterns under every eave, a finial on the top ridge.
+
 ## Subtitles (src/shared/Captions.tsx)
 - **S1. Position:** centre 70 % down, centred. Code: `CAPTION_STYLE.top = 0.7`.
 - **S2. Size:** capital height 52 px at 1080x1920. Code: `fontPx: 72` (Arial Black). ShadowTax used 84.
@@ -142,7 +163,8 @@ How to test a short against these rules:
 ## Characters (per-short toon.ts / cast.ts)
 - **K1. Flat faces that take the scene light.** No face gradient or shadow; face V ≥ 0.94; tint by light (day #f6f1ed, lantern #f9e0cd, dusk #f3daca).
 - **K2. Thin, even outline: 2.2 % of head width (1.9-2.5), dark plum-grey.**
-  - Code: `LookFlags.charOutline` (toon.ts `OUTLINE_K` multiplies `ow`). New shorts 0.45 → 3.3 % on our heads; ShadowTax pins 1 (8.1 %).
+  - Code: `LookFlags.charOutline` (toon.ts `OUTLINE_K` multiplies `ow`); 0.45 gives 3.3 % on our heads.
+  - **User decision 2026-11-11: keep our thick outlines (charOutline 1, 8.1 %) for new shorts.** This rule is measured but not applied.
 - **K3. Brows act.** Thick tapered brows about 25 % of head width long, tilted up to 25-30°. Deadpan half-lidded eyes are the default face; shock = big ringed eyes about 20 % of head width each with dot pupils.
 - **K4. A new expression on almost every sentence, landing on the motivating word.** Background characters react too.
 - **K5. Realism goes into costume, not faces:** quilted or stitched fabric, belts and buckles, textured hair, metal helmets with highlights.

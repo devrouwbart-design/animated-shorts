@@ -71,7 +71,8 @@ New shorts import these instead of copying per-short versions:
   (`NEW_SHORT_LOOK`). Read it with `lookFlags()` in build.ts (`real` → use `realMat` for world materials) and in the
   composition's post toggles (`worldInk` → InkPass on/off). Characters keep their own outline. Finished shorts pin
   their approved look (ShadowTax: `SHADOWTAX_LOOK = { real: false, worldInk: true, charOutline: 1 }`). New shorts also get
-  `charOutline: 0.45` (thinner character outlines, toon.ts `OUTLINE_K`) and `clothTexture: true` (quilted fabric,
+  `charOutline: 1` (our thick character outlines: the user prefers them to the reference's thin ones; toon.ts
+  `OUTLINE_K`, 0.45 gives the reference weight) and `clothTexture: true` (quilted fabric,
   stitched seams and buckles on clothes: toon.ts `Pen.quilt` / `stitch` / `buckle`) and `hairTexture: true`
   (tufted edge, strand clumps and highlights on the `"hair"` hat: `Pen.hairStrands`). Override per render with inputProps
   `{ look: { real, charOutline, cloth, hair }, post: { ink } }`. With realMat, tone through `twoTone(m, liftFor(m.color))` so black
@@ -90,6 +91,11 @@ New shorts import these instead of copying per-short versions:
   the blade colours), `natureTree` (shaded low-poly round/pine trees, no ink). Set `GRASS.uTime.value = f / fps` per
   frame. Test scene: composition `NatureLab`. Use these for every outdoor short instead of the painted grassHD texture
   and the outlined ball trees.
+- `glow.ts`: `lantern()` (HDR glowing lantern + halo + warm point light + optional light cone), `torchFlame()`,
+  `addSpill()` (run it on every lit material so lanterns light the world; twoTone only listens to the sun). Needs the
+  EffectComposer chain with renderer tone mapping off. Night scenes: median luma ~0.22 so lights pop (RULES E1-E5).
+- Example scene: composition `ArmyFrame` (`src/videos/armyframe/`), `PROPS='{"time":"dusk"}'` for the night look,
+  `{"roofCam":true}` for a sharp roof close-up.
 - Test scenes: compositions `LookLab` and `NatureLab` (`src/videos/looklab/`), before/after with `PROPS='{"variant":"before"}'`.
 - Highlights only show on edges: pair realMat with bevelled geometry, and light hero props from the side.
 
