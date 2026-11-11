@@ -3,7 +3,11 @@
 // seeded side bulge + tilt), bean torsos, single-stroke limbs with ink-dot hands, a thick-thin plum outline weighted
 // away from the light, soft painted crescents, deadpan lidded eyes, no blush, no catchlights.
 // Design space 600 x 1000 units (soles at y = 975); the canvas transform scales it.
+import { lookFlags } from "../../shared/look";
+import { SHADOWTAX_LOOK } from "./build";
 export const INK = "#241726";
+/** character outline weight from the short's look flags (shared/look.ts; ShadowTax pins 1) */
+const OUTLINE_K = lookFlags(SHADOWTAX_LOOK).charOutline;
 export const SKIN = "#ffe2c2";
 const WHITE = "#ffffff";
 const MOUTH = "#5a1e28";
@@ -354,7 +358,7 @@ const hatBehind = (p: Pen, o: Outfit, H: Blob, cx: number, hc: number, light: nu
 };
 
 const hatOn = (p: Pen, o: Outfit, hp: P2[], H: Blob, cx: number, hc: number, light: number, seed: number, facing: number, side: boolean) => {
-  const W = 2 * H.a, HH = 2 * H.b, u = W / 100, crown = hc - H.b, ow = 0.85 * 5 * u;
+  const W = 2 * H.a, HH = 2 * H.b, u = W / 100, crown = hc - H.b, ow = 0.85 * 5 * u * OUTLINE_K;
   const a = H.rot + rad(4 * (rnd(seed, 20) - 0.5)); // tilt with the head, +-2 deg extra
   const R = (pts: P2[]) => rotPts(pts, a, cx, hc);
   const sag = (yb: number, wb: number): P2[] => {
@@ -513,7 +517,7 @@ export const bodyFront = (p: Pen, o: Outfit, opts: FrontOpts) => {
   const bob = mode === "march" ? 0.025 * tall * Math.cos(2 * two * phase) : mode === "stroll" ? 0.015 * tall * Math.cos(2 * two * phase) : 0;
   const torsoBot = mode === "sit" ? sole - 0.2 * HH : sole - Bd.legs * HH + bob;
   const chin = torsoBot - Bd.torso * HH, hc = chin - H.b, crown = hc - H.b, hipY = torsoBot - 0.12 * HH;
-  const thick = thickAngle(light), ow = 5 * u;
+  const thick = thickAngle(light), ow = 5 * u * OUTLINE_K;
   const legCol = mix(o.pants, INK, 0.55), armCol = mix(o.jacket, INK, 0.5), footCol = o.boots;
   const legW = 5.8 * u, footW = 7.5 * u;
   // ---- legs + feet (not rotated) ----
@@ -768,7 +772,7 @@ export const bodySide = (p: Pen, o: Outfit, opts: SideOpts) => {
   const Bd = BUILD[o.build ?? "adult"], skin = o.skin ?? SKIN, two = Math.PI * 2, lid = lidOf(blink);
   const H: Blob = { ...headBlob(seed, Bd.a, 1), asym: 0.12, rot: rad(3 + 3 * (rnd(seed, 7) - 0.5)) };
   const W = 2 * H.a, HH = 2 * H.b, u = W / 100, sole = 975, ankY = sole - 4 * u;
-  const thick = thickAngle(light), ow = 5 * u;
+  const thick = thickAngle(light), ow = 5 * u * OUTLINE_K;
   const legLen = (Bd.legs + 0.12) * HH - 4 * u, l1 = legLen / 2, l2 = legLen / 2;
   const nearCol = mix(o.pants, INK, 0.55), farCol = mix(o.pants, INK, 0.75), footCol = o.boots;
   type LegS = { ank: P2; pitch: number; near: boolean };

@@ -7,7 +7,7 @@ import { D0 } from "./story";
 import { brick, rng, ctex, rep, facadeHD, roofHD, stoneHD } from "./paint";
 import { twoTone } from "./shade";
 import { lookFlags, type LookFlags } from "../../shared/look";
-import { realMat, SURFACE, type RealOpts } from "../../shared/realMaterial";
+import { realMat, SURFACE, liftFor, type RealOpts } from "../../shared/realMaterial";
 
 export type Kit = Record<string, THREE.Object3D>;
 export const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
@@ -16,7 +16,7 @@ export const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
 /** this finished short keeps its approved look (toon materials + world ink). New shorts use NEW_SHORT_LOOK from
  *  src/shared/look.ts instead (realistic materials on, world ink off). Override per render with inputProps
  *  `{ look: { real: true }, post: { ink: false } }`. */
-export const SHADOWTAX_LOOK: LookFlags = { real: false, worldInk: true };
+export const SHADOWTAX_LOOK: LookFlags = { real: false, worldInk: true, charOutline: 1 };
 export const REAL_LOOK = lookFlags(SHADOWTAX_LOOK).real;
 /** surface preset from a material key / Kenney material name (roughness, wear, grime: RULES.md M1-M5) */
 const surfaceOf = (key: string): RealOpts => {
@@ -28,7 +28,7 @@ const surfaceOf = (key: string): RealOpts => {
   if (/grass|hill|leaf|hedge|shrub|bloom|bark|straw|g[A-Z]|fruit|mound|skirt/i.test(key)) return { roughness: 0.85, spec: 0.35, wear: 0.6, wearScale: 1.6, grime: 0.25, sky: 0 };
   return { roughness: 0.6 };
 };
-const toneStd = <M extends THREE.MeshStandardMaterial>(m: M) => twoTone(m as unknown as THREE.MeshLambertMaterial) as unknown as M;
+const toneStd = <M extends THREE.MeshStandardMaterial>(m: M) => twoTone(m as unknown as THREE.MeshLambertMaterial, liftFor(m.color)) as unknown as M;
 const realOf = (key: string, p: THREE.MeshLambertMaterialParameters) => realMat(p as THREE.MeshStandardMaterialParameters, surfaceOf(key), toneStd) as unknown as THREE.MeshLambertMaterial;
 const mats = new Map<string, THREE.Material>();
 /** materials whose Strands are built as real interlocking chain links (MAT pass) instead of a textured box tube */

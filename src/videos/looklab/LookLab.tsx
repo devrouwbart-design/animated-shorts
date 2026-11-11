@@ -14,14 +14,14 @@ import { twoTone, TONE } from "../shadowtax/shade";
 import { LIGHTS, LOOK } from "../shadowtax/lights";
 import { ctex, rep, stoneHD } from "../shadowtax/paint";
 import { blockWall, roundedBox, plank } from "../../shared/bevel";
-import { realMat, SURFACE, REAL } from "../../shared/realMaterial";
+import { realMat, SURFACE, REAL, liftFor } from "../../shared/realMaterial";
 import { continuous, openingBeats, smootherstep, mixCam, holdDrift, type Cam, type V3 } from "../../shared/camera";
 
 export const LOOKLAB_FRAMES = 90;
 const variant = () => ((getInputProps() as { variant?: string }).variant === "before" ? "before" : "after");
 
 const lamT = (p: THREE.MeshLambertMaterialParameters) => twoTone(new THREE.MeshLambertMaterial(p));
-const toneStd = <M extends THREE.MeshStandardMaterial>(m: M) => twoTone(m as unknown as THREE.MeshLambertMaterial) as unknown as M;
+const toneStd = <M extends THREE.MeshStandardMaterial>(m: M) => twoTone(m as unknown as THREE.MeshLambertMaterial, liftFor(m.color)) as unknown as M;
 
 const crateTex = () => ctex("labCrate", 128, 128, (g) => { g.fillStyle = "#d9a15a"; g.fillRect(0, 0, 128, 128); g.strokeStyle = "#8a5a2c"; g.lineWidth = 10; g.strokeRect(5, 5, 118, 118); g.beginPath(); g.moveTo(5, 5); g.lineTo(123, 123); g.stroke(); });
 
@@ -58,8 +58,15 @@ const buildScene = (after: boolean) => {
     for (const s of [-1, 1]) put(plank(1.02, 0.07, 0.035, 40 + s), dark, 0, 0.4, s * 0.405, 0, s * Math.atan2(0.62, 0.62), Math.PI / 2); // diagonal braces
     for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) put(roundedBox(0.07, 0.8, 0.07, 0.012), dark, x * 0.37, 0.4, z * 0.37);
     put(roundedBox(0.8, 0.03, 0.8, 0.01), wood, 0, 0.785, 0);
+    // fittings: glossy black corner caps and a brass knob (reference box: white glints, sky-blue edges, hot spot)
+    const black = realMat({ color: "#1a1a1c" }, SURFACE.glossBlack, toneStd), brass = realMat({ color: "#c8913e" }, SURFACE.brass, toneStd);
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) put(roundedBox(0.13, 0.13, 0.13, 0.025), black, x * 0.37, 0.75, z * 0.37);
+    put(new THREE.SphereGeometry(0.035, 24, 16), brass, 0.1, 0.45, 0.42);
   } else {
     const c = add(new THREE.BoxGeometry(0.8, 0.8, 0.8), lamT({ map: crateTex() }), 1.1, 0.4, 0.2); c.rotation.y = -0.35;
+    const black = lamT({ color: "#1a1a1c" }), brass = lamT({ color: "#c8913e" });
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.13, 0.13), black); b.position.set(x * 0.37, 0.335, z * 0.37); c.add(b); }
+    const k = new THREE.Mesh(new THREE.SphereGeometry(0.035, 24, 16), brass); k.position.set(0.1, 0.05, 0.42); c.add(k);
   }
   // ---- iron bucket (lathe: real curvature in both looks) ----
   const prof = [[0.16, 0], [0.2, 0.02], [0.215, 0.34], [0.23, 0.36], [0.205, 0.36], [0.19, 0.03], [0, 0.03]].map(([x, y]) => new THREE.Vector2(x, y));
@@ -92,6 +99,8 @@ const Inner: React.FC<{ f: number; after: boolean }> = ({ f, after }) => {
     TONE.uLitCol.value.set(...L.lit); TONE.uShadeCol.value.set(...L.shade); TONE.uShadeLift.value.set(...L.lift);
     TONE.uLambert.value = L.lambert; TONE.uSideK.value = L.sideK; TONE.uTerm.value = L.term; TONE.uBounce.value.set(...K.bounce); TONE.uSat.value = K.sat;
     REAL.uRealSky.value.set(L.sky);
+    // after: shade keeps the surface hue (reference box: hue shifts 9 deg into shade; our blue-lavender shade shifts 18)
+    if (after) TONE.uShadeCol.value.set(0.52, 0.5, 0.52);
     const g = new THREE.Group();
     const sun = new THREE.DirectionalLight(L.sunCol, L.sunI);
     sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
@@ -100,7 +109,7 @@ const Inner: React.FC<{ f: number; after: boolean }> = ({ f, after }) => {
     sun.position.set(14, 11, 4); sun.target.position.set(0, 0, 0); // side light: shows block relief (reference)
     g.add(sun, sun.target, new THREE.HemisphereLight(L.sky, L.ground, L.hemiI));
     return g;
-  }, []);
+  }, [after]);
   const c = after ? camAfter(f) : camBefore(f);
   const cam = camera as THREE.PerspectiveCamera;
   cam.position.set(...c.pos); cam.up.set(0, 1, 0); cam.lookAt(...(c.look as V3)); cam.rotateZ(c.roll);

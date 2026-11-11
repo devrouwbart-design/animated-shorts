@@ -51,7 +51,15 @@ How to test a short against these rules:
   - Code: `grime` 0.25-0.45 over the lowest `grimeH` 0.45 m above `groundY`.
 - **M4. Sky reflection on glossy and wet surfaces only.**
   - Code: `sky` 0 (cloth) … 0.7 (wet). Set `REAL.uRealSky` per light (world.ts already does: `L.sky`).
-- **M5. Highlights need edges.** Specular on flat faces barely shows (ShadowTax real look: +9 % surface detail, almost no visible highlight). Pair M1 with G1/G2.
+- **M5. Highlights need edges.** Specular on flat faces barely shows (ShadowTax real look: +7 % surface detail, almost no visible highlight). Pair M1 with G1/G2.
+- **M6. Sparkle on glossy dark fittings.**
+  - Measured: black parts stay black (L 0.09) with sharp white sun glints (4.4 % of pixels, peak white) and sky-blue edges (18 % of pixels). Brass has a hot spot.
+  - Code: `SURFACE.glossBlack`, `SURFACE.brass`. Give hero props a few dark or metal fittings (brackets, hinges, knobs).
+- **M7. Top faces get more sky.** Reference box: top/front 1.24, shade/front 0.67. Code: realMat `top` (default 0.1, on top of twoTone's own up-facing boost).
+- **M8. Shade keeps the surface hue (≤ 10° shift).**
+  - Our day shade [.46,.46,.56] plus an additive blue lift turns warm wood mauve (18° shift).
+  - For new shorts, set lights.ts `shade` near neutral (LookLab uses [.52,.50,.52]).
+  - Use `twoTone(m, liftFor(m.color))` so dark parts don't go navy; build.ts `toneStd` and LookLab already do.
 - **G1. No hard boxes for props.**
   - Bevel radius 4-8 % of the smallest side.
   - Code: `roundedBox(w, h, d)` (default `BEVEL_FRAC = 0.06`), `roundedBoxBetween(min, max)` as a drop-in for `boxGeo`, `plank()`.
@@ -132,5 +140,9 @@ How to test a short against these rules:
   - End on the hero's deadpan face for 1-2 s with the punchline as the last word.
 
 ## Characters (per-short toon.ts / cast.ts)
-- **K1. Flat faces, textured clothes.** Faces stay flat and bright (near 0.9 luma) with a black outline of about 8 px at 1080. Costumes carry fabric texture (quilting, stitching, belts).
-- **K2. A new expression on almost every sentence.** Background characters react too.
+- **K1. Flat faces that take the scene light.** No face gradient or shadow; face V ≥ 0.94; tint by light (day #f6f1ed, lantern #f9e0cd, dusk #f3daca).
+- **K2. Thin, even outline: 2.2 % of head width (1.9-2.5), dark plum-grey.**
+  - Code: `LookFlags.charOutline` (toon.ts `OUTLINE_K` multiplies `ow`). New shorts 0.45 → 3.3 % on our heads; ShadowTax pins 1 (8.1 %).
+- **K3. Brows act.** Thick tapered brows about 25 % of head width long, tilted up to 25-30°. Deadpan half-lidded eyes are the default face; shock = big ringed eyes about 20 % of head width each with dot pupils.
+- **K4. A new expression on almost every sentence, landing on the motivating word.** Background characters react too.
+- **K5. Realism goes into costume, not faces:** quilted or stitched fabric, belts and buckles, textured hair, metal helmets with highlights. Not built yet: a fabric-texture fill for toon.ts clothes.

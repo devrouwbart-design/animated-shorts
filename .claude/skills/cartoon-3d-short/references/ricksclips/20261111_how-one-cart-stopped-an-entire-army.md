@@ -90,10 +90,11 @@ What their props have that ours don't (described from full-resolution key frames
 
 Why our material layer alone moves the numbers only a little on ShadowTax: our world is flat faces drawn with ink, so
 there are no curved or bevelled edges for highlights to land on. Real-material test on ShadowTax (inputProps
-`{look:{real:true}}`): surface detail away from edges +9 % (1.076 → 1.174), roofs/cobbles gain tone wear and a sky
-sheen; turning world ink off as well drops ink 1.98 → 1.08 % and edges 0.140 → 0.122 (reference 0.77 / 0.103).
-In the LookLab test scene, bevelled blocks + realMat raise highlight pixels 2.6x (1.5 → 4.0 per 1000) and give the
-wall visible block relief.
+`{look:{real:true}}`): roofs/cobbles gain tone wear; with world ink off as well, surface detail away from edges +7 %
+(1.076 → 1.156), ink 1.98 → 0.97 % and edges 0.140 → 0.123 (reference 0.77 / 0.103).
+In the LookLab test scene, bevelled blocks + realMat + glossy fittings raise highlight pixels 5x (1.5 → 7.9 per 1000)
+and give the wall visible block relief. (Numbers re-measured after fixing a flipped view direction in the sky
+reflection term on 2026-11-11; the first measurements had too much sky sheen everywhere.)
 
 ## 4. Colour and light
 Whole video: luma 0.437 (p2 0.116, p98 0.894, std 0.196), saturation 0.398, colourfulness 61.6, warm share 0.43.
@@ -185,7 +186,57 @@ Their nature looks real because the detail is spent where the lens is. Far away 
   - Saturation, value and fine detail now sit inside the reference ranges.
   - The value range is still low: the rest of theirs comes from cast shadows inside the turf and DOF.
 
-## 11. Where ShadowTax falls short (in order of impact)
+## 11. How light reflects on objects (the drilled box in the opening)
+The "sun reflecting on the box" is several simple effects stacked together, not one mirror reflection:
+- **Three face values.** Measured at 0.0 s:
+  - top face (sky + sun) #f7dd98 L 0.87
+  - sunlit front #e0ae4c L 0.70
+  - side turned away #907556 L 0.47
+  - So top/front = 1.24 and shade/front = 0.67: the shade side keeps two thirds of the light (strong sky fill).
+- **Shade keeps the hue.** Lit → shade hue moves 40° → 31° (9°), saturation 0.70 → 0.26. Our two-tone shade
+  (uShadeCol [.46,.46,.56] plus an additive blue lift) turns warm wood mauve: hue moves 18°.
+- **The big wood faces barely shine.**
+  - Across the drilled panel in close-up, L rises only 0.71 → 0.73 (a faint broad sheen).
+  - Top to bottom it falls 0.75 → 0.65 (darker toward the base).
+  - Fine wood grain and bevelled edges catch thin lines of light.
+- **The sparkle is on glossy dark parts.**
+  - The black drill body shows sharp white rectangular glints: 4.4 % of its pixels above L 0.85, peak pure white.
+  - The black brackets stay black (L 0.09) with sky-blue edges: 18 % of their pixels are blue-dominant reflections, mean RGB (61, 78, 106).
+  - Brass knobs have small hot spots.
+  - Contrast does the work: white glints on near-black read as "sun reflecting", while a glossy yellow face would only look washed out.
+- **What we built:**
+  - `SURFACE.glossBlack` / `SURFACE.brass` presets and a `top` sky boost (default +10 %) in realMaterial.ts.
+  - `liftFor(color)`, which scales the two-tone shade lift with the albedo, so black stays black.
+  - A neutral shade colour in LookLab.
+  - LookLab crate result:
+    - hue shift into shade 13° → 11° (reference 9°)
+    - top/shade value 1.44 → 1.59 (reference 1.85)
+    - black caps L ≈ 0.1 with a sun glint and blue edges; brass hot spot
+    - highlight pixels 1.5 → 7.9 per 1000
+
+## 12. Characters
+- **Construction:** round, slightly wide heads (measured face area h/w 0.77-0.87 without hair; hair and headbands sit
+  on top), stick limbs, bean bodies. Head width 150-510 px at 1080 in medium and close shots.
+- **Outline:** dark plum-grey (#27-2b / 1c-26 / 28-3b), 1.9-2.5 % of the head width (median 2.2 %), fairly even all
+  round. ShadowTax: 7.6-8.7 % (thick-thin `ow = 5u` swinging ±45 %), more saturated purple. About 3x heavier.
+- **Face shading:** flat, no gradient and no shadow. The face colour simply takes the scene light: day #f6f1ed
+  (near white), lantern night #f9e0cd, dusk #f3daca, explosion glow #feebd7. Faces stay the brightest thing in frame
+  (V ≥ 0.94), so they always read.
+- **The realism goes into what they wear:** quilted fabric with stitched seams, belts with metal buckles, textured hair
+  with strand highlights, folded headbands, metal helmets with specular highlights. Faces stay simple.
+- **Expressions** (technique, not their characters). Brows do most of the acting:
+  - Brows: thick black tapered strokes, about 25 % of the head width long and 3.5 % thick, tilted up to 25-30°.
+  - Deadpan / smug (the default face): upper lids cut flat across the pupils (half-lidded D eyes), level or one raised brow, tiny "o" mouth or a small line.
+  - Shock: big round white eyes with a black ring and a dot pupil (each about 20 % of head width), brows high, open mouth with a pink tongue.
+  - Angry: brows in a hard V, red-tinted eye whites, gritted or shouting mouth.
+  - Laugh / grin: wide open D mouth with pink tongue and teeth, squeezed eyes.
+  - Sleepy / bored: closed lid lines, small open mouth.
+  - Changes land on the word that motivates them ("pours." → shock in the same frame). The hero changes face about once per sentence; side characters react in the background.
+- **Our cast** already has the same kinds of expressions (toon.ts FACE: lid, shock, grin, laugh, stern...). The
+  measurable gaps are the outline weight and textured clothing.
+  - `charOutline` 0.45 (new-short default) brings ShadowTax faces from 8.1 % to 3.3 % of head width.
+
+## 13. Where ShadowTax falls short (in order of impact)
 1. Cuts instead of one continuous camera (22 hard cuts vs 0).
 2. Flat ink-lined world vs bevelled, textured, specular props (ink 2.6x theirs; no bevels; no wear or grime).
 3. Over-saturated, over-bright palette (colourfulness 85 vs 59, luma 0.64 vs 0.45).
@@ -194,3 +245,5 @@ Their nature looks real because the detail is spent where the lens is. Far away 
 6. Captions 15 % too big, outline 3x too heavy, tiny words flashing (fixed in shared Captions).
 7. One light per stretch of story; theirs changes time of day on beats (ShadowTax does change light, mostly by shot).
 8. Nature: painted flat grass and outlined ball trees vs 3D blades at the lens and shaded low-poly trees (section 10).
+9. Character outlines 3x too heavy; clothes flat colour instead of textured (section 12).
+10. Shade turns warm surfaces mauve; black parts go navy (fixed lift); no glossy fittings to catch the sun (section 11).

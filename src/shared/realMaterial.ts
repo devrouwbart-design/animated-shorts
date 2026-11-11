@@ -27,14 +27,23 @@ export type RealOpts = {
   grimeH?: number;
   /** sky reflection strength at grazing angles (0 = off) */
   sky?: number;
+  /** extra sky light on up-facing faces (reference box: top face 1.24x its sunlit front) */
+  top?: number;
 };
+
+/**
+ * Shade-lift scale for a two-tone diffuse model whose lift is ADDED in shade (shade.ts twoTone `liftK`): a fixed lift
+ * turns black fittings navy and dark iron grey. Scale it with the albedo so dark parts stay dark (reference: black
+ * brackets L 0.09 in shade, blue only on the grazing edges). Use as `twoTone(m, liftFor(m.color))`.
+ */
+export const liftFor = (c: THREE.Color) => Math.max(0.08, Math.min(1, (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * 2.2));
 
 /** shared uniforms: the world sets the sky colour per light (e.g. to its horizon colour) once per frame */
 export const REAL = {
   uRealSky: { value: new THREE.Color("#bcd3ee") },
 };
 
-export const REAL_DEFAULTS: Required<RealOpts> = { roughness: 0.6, metal: 0, spec: 1, wear: 0.5, wearScale: 0.6, grime: 0.35, groundY: 0, grimeH: 0.45, sky: 0.25 };
+export const REAL_DEFAULTS: Required<RealOpts> = { roughness: 0.6, metal: 0, spec: 1, wear: 0.5, wearScale: 0.6, grime: 0.35, groundY: 0, grimeH: 0.45, sky: 0.25, top: 0.1 };
 
 /** surface presets measured from the reference props (roughness from highlight size, wear from tone spread) */
 export const SURFACE = {
@@ -44,6 +53,10 @@ export const SURFACE = {
   metal: { roughness: 0.35, metal: 1, spec: 1.2, wear: 0.4, wearScale: 0.25, grime: 0.25, sky: 0.6 },
   cloth: { roughness: 0.92, spec: 0.3, wear: 0.3, wearScale: 0.3, grime: 0.2, sky: 0 },
   wet: { roughness: 0.22, spec: 1.4, wear: 0.3, wearScale: 0.8, grime: 0.2, sky: 0.7 },
+  /** glossy black fittings (drill body, brackets): sharp white sun glints + blue sky on the edges */
+  glossBlack: { roughness: 0.18, spec: 1.6, wear: 0.15, wearScale: 0.3, grime: 0.1, sky: 0.9 },
+  /** brass knobs and fittings: warm metal with a hot spot */
+  brass: { roughness: 0.28, metal: 1, spec: 1.5, wear: 0.3, wearScale: 0.2, grime: 0.15, sky: 0.5 },
 } satisfies Record<string, RealOpts>;
 
 export const NOISE_GLSL = /* glsl */ `
@@ -88,17 +101,20 @@ export function realify<T extends THREE.MeshStandardMaterial>(m: T, opts: RealOp
       // metals lose their diffuse (the specular colour was already taken from the albedo above)
       .replace("#include <lights_physical_fragment>", `#include <lights_physical_fragment>
   diffuseColor.rgb *= 1.0 - 0.85 * metalnessFactor;`)
+      // top faces get more sky (runs after any two-tone diffuse model, which rewrites directDiffuse at lights_fragment_end)
+      .replace("#include <aomap_fragment>", `#include <aomap_fragment>
+  reflectedLight.directDiffuse *= 1.0 + ${f(o.top)} * max(dot(normal, normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz)), 0.0);`)
       .replace("#include <lights_fragment_end>", `#include <lights_fragment_end>
   reflectedLight.directSpecular *= ${f(o.spec)};
   {
     vec3 rUp = normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
-    float rFres = pow(1.0 - clamp(dot(normal, normalize(vViewPosition) * -1.0), 0.0, 1.0), 5.0);
+    float rFres = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 5.0);
     float rGloss = (1.0 - roughnessFactor) * (1.0 - roughnessFactor);
     vec3 rF0 = mix(vec3(0.04), diffuseColor.rgb / max(1.0 - 0.85 * metalnessFactor, 0.15), metalnessFactor);
     reflectedLight.indirectSpecular += uRealSky * (rF0 + (1.0 - rF0) * rFres) * rGloss * (0.6 + 0.4 * dot(normal, rUp)) * ${f(o.sky)} * rGrime;
   }`);
   };
-  const key = `real1_${f(o.roughness)}_${f(o.metal)}_${f(o.spec)}_${f(o.wear)}_${f(o.wearScale)}_${f(o.grime)}_${f(o.groundY)}_${f(o.grimeH)}_${f(o.sky)}`;
+  const key = `real1_${f(o.roughness)}_${f(o.metal)}_${f(o.spec)}_${f(o.wear)}_${f(o.wearScale)}_${f(o.grime)}_${f(o.groundY)}_${f(o.grimeH)}_${f(o.sky)}_${f(o.top)}`;
   m.customProgramCacheKey = () => (prevKey ? prevKey() + "|" : "") + key;
   return m;
 }
