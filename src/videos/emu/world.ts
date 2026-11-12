@@ -430,7 +430,7 @@ export class World {
     b.add(box(mx + 1.6, 0, mz - 2.5, mx + 2.4, 0.6, mz + 1.5), tin);
 
     // ---- gum trees, saltbush, rocks ----
-    const gum = (x: number, z: number, h: number) => prop(b, kit, "gum", x, hAt(x, z), z, h, r() * 6);
+    const gum = (x: number, z: number, h: number) => { if (Math.hypot(x - ROCK[0], z - ROCK[2]) > 16) prop(b, kit, "gum", x, hAt(x, z), z, h, r() * 6); };
     for (const [x, z, h] of [[-52, 34, 15], [-22, 40, 13], [-58, 2, 12], [-18, 14, 11], [-44, 44, 14]] as const) gum(x, z, h);
     for (let x = -280; x < 280; x += 9 + r() * 22) { // along the road, both sides
       if (Math.abs(x - TRUCK_STOP[0]) < 14) continue;

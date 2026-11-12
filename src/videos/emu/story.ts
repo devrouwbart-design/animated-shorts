@@ -211,21 +211,20 @@ const S16b = (f: number) => { const u = glide((f - 1340) / 30); return dolly(add
 // shots 17-18: the hose in the yard
 const S17a = (f: number) => dolly(add(HOSE, [-2.0, 1.7, -10.5]), add(HOSE, [-2.0, 1.0, 1.0]), pushK(f, 1383, 0.0022), { fov: 44 });
 const S17b = (f: number) => dolly(add(HOSE, [-2.6, 1.5, -3.0]), add(HOSE, [-3.0, 1.25, 1.8]), pushK(f, 1470, 0.003, 0.006, 25), { fov: 40 });
-const S18a = (f: number) => dolly(add(HOSE, [-5, 9, -12]), add(HOSE, [-6, 0, 3]), pushK(f, 1508, 0.002), { fov: 46 });
-const S18b = (f: number) => dolly(add(HOSE, [-1, 2.2, -8]), add(HOSE, [-6, 0.8, 2]), pushK(f, 1563, 0.0025), { fov: 46, roll: 0.03 });
+const S18a = (f: number) => dolly(add(HOSE, [-4, 7.5, -10]), add(HOSE, [-5.5, 0, 3]), pushK(f, 1508, 0.0018), { fov: 48 });
 // shot 19: the major, an emu strolls past behind him
 const S19a = (f: number) => dolly(add(MAJOR_TRUCK, [0.5, 1.55, -3.2]), add(MAJOR_TRUCK, [0, 1.48, 0]), pushK(f, 1626, 0.002, 0.006, 25), { fov: 40 });
 // shot 20: the pile of empty boxes and brass; the major counting
-const S20a = (f: number) => dolly(add(TRUCK_STOP, [3.6, 1.7, -7.5]), add(TRUCK_STOP, [1.0, 0.7, -3.2]), pushK(f, 1732, 0.002, 0.005, 30), { fov: 42 });
+const S20a = (f: number) => dolly(add(TRUCK_STOP, [2.6, 2.0, -9.8]), add(TRUCK_STOP, [0.6, 0.9, -3.0]), pushK(f, 1732, 0.002, 0.005, 30), { fov: 44 });
 // shot 21: ten casings in a row, an emu stalks through
 export const CASINGS: V3 = [TRUCK_STOP[0] + 2.4, 0, ROAD_Z - 5.5];
-const S21a = (f: number) => dolly(add(CASINGS, [0.25, 0.45, -1.3]), add(CASINGS, [0.25, 0.08, 0]), pushK(f, 1858, 0.003), { fov: 40 });
+const S21a = (f: number) => dolly(add(CASINGS, [0.95, 0.42, -0.75]), add(CASINGS, [0.2, 0.05, 0.05]), pushK(f, 1858, 0.003), { fov: 42 });
 // shot 22: golden: the truck drives home along the road; the farmer with his reward
-const S22a = (f: number) => dolly([TRUCK_STOP[0] - 4, 1.7, ROAD_Z - 12], [TRUCK_STOP[0] + 30, 1.4, ROAD_Z + 2], pushK(f, 1910, 0.0018), { fov: 42 });
+const S22a = (f: number) => dolly([TRUCK_STOP[0] - 3, 1.6, ROAD_Z - 9], [TRUCK_STOP[0] + 10, 1.3, ROAD_Z], pushK(f, 1910, 0.0018), { fov: 44 });
 const S22b = (f: number) => dolly(add(FARMER, [-2.0, 1.5, -3.6]), add(FARMER, [0.3, 1.35, 0]), pushK(f, 1955, 0.0025), { fov: 40 });
 // shot 23: the coat-of-arms knoll against the sunset; wide at "The army doesn't" with the truck far away
-const S23a = (f: number) => dolly(add(ROCK, [0.4, 2.0, -9]), add(ROCK, [0, 2.6, 0]), pushK(f, 1999, 0.002), { fov: 40 });
-const S23b = (f: number) => dolly(add(ROCK, [-3, 1.8, -17]), add(ROCK, [6, 2.2, 0]), pushK(f, 2079, 0.0015), { fov: 44, roll: 0.02 });
+const S23a = (f: number) => dolly(add(ROCK, [0.3, 2.3, -12]), add(ROCK, [0, 3.0, 0]), pushK(f, 1999, 0.002), { fov: 40 });
+const S23b = (f: number) => dolly(add(ROCK, [-2.5, 2.2, -16]), add(ROCK, [2.2, 2.8, 0]), pushK(f, 2079, 0.0015), { fov: 44, roll: 0.02 });
 
 const CAMS: Record<number, Key[]> = {
   1: [{ f: 0, s: S1a }, { f: 92, cut: true, s: S1b }],
@@ -245,7 +244,7 @@ const CAMS: Record<number, Key[]> = {
   15: [{ f: 1165, s: S15a }, { f: 1220, cut: true, s: S15b }, { f: 1262, cut: true, s: S15c }],
   16: [{ f: 1303, s: S16a }, { f: 1318, cut: true, s: S16b }],
   17: [{ f: 1379, s: S17a }, { f: 1470, cut: true, s: S17b }],
-  18: [{ f: 1508, s: S18a }, { f: 1563, cut: true, s: S18b }],
+  18: [{ f: 1508, s: S18a }],
   19: [{ f: 1626, s: S19a }],
   20: [{ f: 1732, s: S20a }],
   21: [{ f: 1858, s: S21a }],

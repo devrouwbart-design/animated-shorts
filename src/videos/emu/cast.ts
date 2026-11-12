@@ -453,8 +453,8 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
 
   if (id === 19) {
     facing(out, cam, t, MAJ, MAJOR_TRUCK[0], 0, MAJOR_TRUCK[2], -1, -0.3, exprAt(t, [[1626, "stern"], [1680, "neutral"], [1714, "shock"]]));
-    const x = MAJOR_TRUCK[0] - 3 + 1.2 * (t - 1640 / FPS);
-    emu(out, cam, t, 4, x, 0, MAJOR_TRUCK[2] + 4.5, 1, 0, "walk", { eye: "smug" });
+    const x = MAJOR_TRUCK[0] - 2.6 + 1.4 * (t - 1660 / FPS);
+    emu(out, cam, t, 4, x, 0, MAJOR_TRUCK[2] - 1.0, 1, 0, "walk", { eye: "smug" });
   }
   if (id === 20) {
     one(out, cam, t, MAJ, TRUCK_STOP[0] + 2.2, 0, ROAD_Z - 2.4, { expr: exprAt(t, [[1732, "stern"], [1798, "nervous"]]), headTilt: 0.08 });
@@ -462,7 +462,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     one(out, cam, t, GUNNER(1), TRUCK_STOP[0] - 2.2, 0, ROAD_Z - 3.6, { mode: "sit", expr: "nervous" });
   }
   if (id === 21) {
-    const x = CASINGS[0] - 1.6 + 1.1 * (t - 1858 / FPS);
+    const x = CASINGS[0] - 1.0 + 1.1 * (t - 1858 / FPS);
     emu(out, cam, t, 5, x, 0, CASINGS[2] + 0.45, 1, 0, "walk", { eye: "smug" });
   }
 
@@ -470,7 +470,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     if (f < 1955) FARMERS.forEach((_, k) => one(out, cam, t, who(farmerO(k), 30 + k, `fa${k}`), TRUCK_STOP[0] + 6 + k * 1.2, 0, ROAD_Z + 4.5 + (k % 2) * 0.4, { expr: "grin", wave: (t * 3 + k) % 1 }));
     else {
       one(out, cam, t, who(farmerO(0), 30, "fa0"), FARMER[0], 0, FARMER[2], { expr: "grin", wave: 0.5 });
-      fx(out, "coins", 300, (p) => fxCoins(p), FARMER[0] + 0.35, 1.75, FARMER[2] - 0.1, 0.45);
+      fx(out, "coins", 300, (p) => fxCoins(p), FARMER[0] + 0.5, 1.4, FARMER[2] - 0.15, 0.4);
       emu(out, cam, t, 6, FARMER[0] + 2.4, WHEAT_H - 0.45, FARMER[2] + 1.6, -1, 0, "stand", { eye: "smug", ground: false });
     }
     const tp = truckPose(id, f);
