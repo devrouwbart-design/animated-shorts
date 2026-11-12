@@ -196,24 +196,24 @@ const S10a = (f: number) => dolly([DAM.x - 26, 7, DAM.z - 40], [DAM.x, 0, DAM.z]
 const S10b = (f: number) => dolly(add(MAJOR_DAM, [2.5, 0.8, -3.2]), add(MAJOR_DAM, [0, 0.9, 0.5]), pushK(f, 846, 0.003), { fov: 40 });
 const S11a = (f: number) => dolly([DAM.x - 4, 2.9, DAM.z - 19], [DAM.x + 2, 0.2, DAM.z + 8], pushK(f, 870, 0.0022), { fov: 44 });
 const S12a = (f: number) => dolly(add(MAJOR_DAM, [0.9, 0.72, -1.9]), add(MAJOR_DAM, [0, 0.95, 0]), pushK(f, 923, 0.002, 0.006, 25), { fov: 38 });
-const S12b = (f: number) => dolly(add(DAM_GUN, [1.9, 1.7, -1.7]), add(DAM_GUN, [-0.8, 1.1, 8]), pushK(f, 982, 0.003), { fov: 42, roll: 0.04 });
+const S12b = (f: number) => dolly(add(DAM_GUN, [1.5, 1.65, 2.9]), add(DAM_GUN, [-0.5, 1.25, -0.2]), pushK(f, 982, 0.003), { fov: 44, roll: 0.04 });
 const S13a = (f: number) => dolly([DAM.x + 14, 2.4, DAM.z - 6], [DAM.x - 2, 0.6, DAM.z + 6], pushK(f, 1006, 0.0025), { fov: 42 });
 const S13b = (f: number) => dolly(add(DAM_GUN, [0.9, 1.55, 1.7]), add(DAM_GUN, [-0.55, 1.3, -0.3]), pushK(f, 1040, 0.003, 0.008, 18), { fov: 40, roll: -0.04 });
 // shot 14: the truck with the gun on the back
 const S14a = (f: number) => { const tp = truckPose(14, f); return dolly([tp.x + 5.5, 2.2, ROAD_Z - 8], [tp.x - 0.6, 1.5, ROAD_Z], pushK(f, 1070, 0.0025), { fov: 42 }); };
 // shot 15: tracking beside the bouncing truck; emus pull away ahead
 const S15a = (f: number) => { const tp = truckPose(15, f); return { pos: [tp.x + 1.5, 2.3, tp.z - 9] as V3, look: [tp.x + 4, 1.4, tp.z] as V3, fov: 44, roll: 0.02 * Math.sin(f * 0.4) }; };
-const S15b = (f: number) => { const tp = truckPose(15, f); return { pos: [tp.x + 10, 1.5, tp.z - 6.5] as V3, look: [tp.x + 2, 1.5, tp.z] as V3, fov: 42, roll: -0.03 }; };
+const S15b = (f: number) => { const tp = truckPose(15, f); return { pos: [tp.x + 30, 1.7, tp.z - 7] as V3, look: [tp.x + 8, 1.3, tp.z] as V3, fov: 40, roll: -0.03 }; };
 const S15c = (f: number) => { const tp = truckPose(15, f); return { pos: [tp.x - 0.4, 2.9, tp.z - 2.6] as V3, look: [tp.x - 1.6, 2.2, tp.z] as V3, fov: 40, roll: 0.05 * Math.sin(f * 0.6) }; };
 // shot 16: "Wait." the emu stares into the lens; then tilt up from the soldier to the emu's head
 const S16a = (f: number) => dolly(add(TALL_EMU, [0.4, 1.7, -2.6]), add(TALL_EMU, [0, 1.7, 0]), pushK(f, 1303, 0.003), { fov: 38 });
 const S16b = (f: number) => { const u = glide((f - 1340) / 30); return dolly(add(TALL_EMU, [-0.4, 1.3, -4.4]), add(TALL_EMU, [-0.45, 1.0 + 0.85 * u, 0]), pushK(f, 1318, 0.002), { fov: 40 }); };
 // shots 17-18: the hose in the yard
-const S17a = (f: number) => dolly(add(HOSE, [-2.0, 1.7, -10.5]), add(HOSE, [-2.0, 1.0, 1.0]), pushK(f, 1383, 0.0022), { fov: 44 });
+const S17a = (f: number) => dolly(add(HOSE, [-1.9, 1.7, -13]), add(HOSE, [-1.9, 1.0, 1.0]), pushK(f, 1383, 0.0022), { fov: 46 });
 const S17b = (f: number) => dolly(add(HOSE, [-2.6, 1.5, -3.0]), add(HOSE, [-3.0, 1.25, 1.8]), pushK(f, 1470, 0.003, 0.006, 25), { fov: 40 });
-const S18a = (f: number) => dolly(add(HOSE, [-4, 7.5, -10]), add(HOSE, [-5.5, 0, 3]), pushK(f, 1508, 0.0018), { fov: 48 });
+const S18a = (f: number) => dolly(add(HOSE, [-4.5, 14, -13]), add(HOSE, [-6, 0, 3]), pushK(f, 1508, 0.0015), { fov: 50 });
 // shot 19: the major, an emu strolls past behind him
-const S19a = (f: number) => dolly(add(MAJOR_TRUCK, [0.5, 1.55, -3.2]), add(MAJOR_TRUCK, [0, 1.48, 0]), pushK(f, 1626, 0.002, 0.006, 25), { fov: 40 });
+const S19a = (f: number) => dolly(add(MAJOR_TRUCK, [0.6, 1.6, -4.8]), add(MAJOR_TRUCK, [0, 1.4, 0.4]), pushK(f, 1626, 0.002, 0.006, 25), { fov: 42 });
 // shot 20: the pile of empty boxes and brass; the major counting
 const S20a = (f: number) => dolly(add(TRUCK_STOP, [2.6, 2.0, -9.8]), add(TRUCK_STOP, [0.6, 0.9, -3.0]), pushK(f, 1732, 0.002, 0.005, 30), { fov: 44 });
 // shot 21: ten casings in a row, an emu stalks through

@@ -410,7 +410,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
       const t0 = 1530 / FPS;
       for (let k = 0; k < 14; k++) {
         const i = 700 + k, a = (k / 14) * Math.PI * 2 + hash(i, 1) * 0.4, r0 = 1 + 1.6 * hash(i, 2);
-        const run = t > t0 + 0.08 * hash(i, 3), d = r0 + (run ? 7 * (t - t0) : 0);
+        const run = t > t0 + 0.08 * hash(i, 3), d = r0 + (run ? 3.2 * (t - t0) : 0);
         const x = HOSE[0] - 6 + Math.cos(a) * d, z = HOSE[2] + 3 + Math.sin(a) * d;
         emu(out, cam, t, i, x, 0, z, Math.cos(a), Math.sin(a), run ? "run" : "peck", { eye: run ? "wide" : "open", speed: 1.2 });
       }
@@ -453,8 +453,8 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
 
   if (id === 19) {
     facing(out, cam, t, MAJ, MAJOR_TRUCK[0], 0, MAJOR_TRUCK[2], -1, -0.3, exprAt(t, [[1626, "stern"], [1680, "neutral"], [1714, "shock"]]));
-    const x = MAJOR_TRUCK[0] - 2.6 + 1.4 * (t - 1660 / FPS);
-    emu(out, cam, t, 4, x, 0, MAJOR_TRUCK[2] - 1.0, 1, 0, "walk", { eye: "smug" });
+    const x = MAJOR_TRUCK[0] - 1.9 + 1.0 * (t - 1660 / FPS);
+    emu(out, cam, t, 4, x, 0, MAJOR_TRUCK[2] + 0.75, 1, 0, "walk", { eye: "smug" });
   }
   if (id === 20) {
     one(out, cam, t, MAJ, TRUCK_STOP[0] + 2.2, 0, ROAD_Z - 2.4, { expr: exprAt(t, [[1732, "stern"], [1798, "nervous"]]), headTilt: 0.08 });
