@@ -288,7 +288,7 @@ const emu = (out: Stage, cam: CamInfo, t: number, i: number, x: number, y: numbe
 };
 /** a mob of n emus scattered in a rectangle, walking / eating; legs hidden when they stand in the wheat */
 const inWheat = (x: number, z: number) => x > FIELD.x0 && x < FIELD.x1 && z > FIELD.z0 && z < FIELD.z1;
-const groundY = (x: number, z: number) => (inWheat(x, z) ? WHEAT_H - 0.75 : hAt(x, z));
+const groundY = (x: number, z: number) => (inWheat(x, z) ? WHEAT_H - 0.45 : hAt(x, z));
 const mob = (out: Stage, cam: CamInfo, t: number, i0: number, n: number, x0: number, x1: number, z0: number, z1: number, mode: (k: number) => EmuMode, vz = 0, vx = 0) => {
   for (let k = 0; k < n; k++) {
     const i = i0 + k, m = mode(k), move = m === "walk" || m === "run";
@@ -344,7 +344,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
   if (id === 5) {
     if (f < 450) mob(out, cam, t, 200, 150, 22, 90, -18, 40, (k) => (hash(k, 9) < 0.35 ? "peck" : "walk"), -1.1, 0);
     else {
-      emu(out, cam, t, 2, 24, WHEAT_H - 0.75, -33, 1, 0.3, "peck", { ground: false });
+      emu(out, cam, t, 2, 24, WHEAT_H - 0.45, -33, 1, 0.3, "peck", { ground: false });
       mob(out, cam, t, 400, 24, 18, 40, -26, 0, () => "peck");
     }
   }
@@ -366,7 +366,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     if (rain) {
       one(out, cam, t, MAJ, MAJOR_TRUCK[0], 0, MAJOR_TRUCK[2], { expr: "nervous" });
       for (let k = 0; k < 16; k++) { // rain streak cards between the lens and the soldiers
-        const x = TRUCK_STOP[0] - 6 + (k % 8) * 1.4 + hash(k, 1), z = ROAD_Z - 9 + Math.floor(k / 8) * 2.6 + hash(k, 2), y = 2.2 - ((t * 9 + hash(k, 3) * 3) % 3);
+        const x = TRUCK_STOP[0] - 6 + (k % 8) * 1.4 + hash(k, 1), z = ROAD_Z - 7 + Math.floor(k / 8) * 2.6 + hash(k, 2), y = 2.2 - ((t * 9 + hash(k, 3) * 3) % 3);
         fx(out, `rain${k % 4}`, 512, (p) => fxRain(p, k % 4), x, y, z, 2.6, { soft: true });
       }
     }
@@ -471,7 +471,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     else {
       one(out, cam, t, who(farmerO(0), 30, "fa0"), FARMER[0], 0, FARMER[2], { expr: "grin", wave: 0.5 });
       fx(out, "coins", 300, (p) => fxCoins(p), FARMER[0] + 0.35, 1.75, FARMER[2] - 0.1, 0.45);
-      emu(out, cam, t, 6, FARMER[0] + 2.4, WHEAT_H - 0.75, FARMER[2] + 1.6, -1, 0, "stand", { eye: "smug", ground: false });
+      emu(out, cam, t, 6, FARMER[0] + 2.4, WHEAT_H - 0.45, FARMER[2] + 1.6, -1, 0, "stand", { eye: "smug", ground: false });
     }
     const tp = truckPose(id, f);
     if (tp.on) puff(out, t, (Math.floor(f / 10) * 10) / FPS, tp.x - 3, 0, tp.z, 1.6, 1.2);

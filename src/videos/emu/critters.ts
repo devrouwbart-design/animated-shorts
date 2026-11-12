@@ -97,7 +97,7 @@ export const emuSide = (p: Pen, o: EmuOpts) => {
   // ---- neck + head ----
   const base: P2 = [cx + rx * 0.72, cy - ry * 0.45];
   let head: P2, ctrl: P2;
-  if (mode === "peck") { const d = 0.5 + 0.5 * Math.sin(ph * 2); head = [cx + rx + 150, 820 + 120 * d]; ctrl = [cx + rx + 180, 420]; }
+  if (mode === "peck") { const d = 0.5 + 0.5 * Math.sin(ph * 2); head = [cx + rx + 150, 740 + 110 * d]; ctrl = [cx + rx + 180, 400]; }
   else if (mode === "drink") { head = [cx + rx + 150, 948]; ctrl = [cx + rx + 190, 520]; }
   else if (run) { head = [cx + rx + 190, cy - 230 - bob * 0.5]; ctrl = [cx + rx + 40, cy - 120]; }
   else if (mode === "proud") { head = [cx + rx + 40, 140]; ctrl = [cx + rx + 110, 330]; }
