@@ -22,7 +22,7 @@ Not used (sources disagree or unverified): the ornithologist's "guerrilla tactic
 
 Analogy: a machine gun is like a garden hose. Great against a crowd standing still. Useless when every target runs a different way at fifty kilometres an hour.
 
-## Script v1 (~205 words, ~60 s at 3.5-3.7 words/s)
+## Script v1 (superseded: v2, in the lake style, is in VOICEOVER.txt; same facts)
 | Beat | Line |
 |---|---|
 | Hook | In 1932, Australia went to war against a bird. And the bird won. |
