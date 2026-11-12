@@ -7,3 +7,4 @@ __pycache__/
 # sound stems are rebuilt by audio/lake_sound.py; only the final mix is kept
 shorts/*/audio/music.wav
 shorts/*/audio/sfx.wav
+shorts/emu/voice/raw.wav
