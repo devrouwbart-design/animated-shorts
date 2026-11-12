@@ -166,7 +166,7 @@ export const TALL_EMU: V3 = [6, 0, -78];                                        
 export const HOSE: V3 = [YARD[0] + 4, 0, YARD[2] - 2];                           // farmer with the hose
 
 // shot 1: low behind the gunner, the gun pointing at one emu; on "bird" the emu close-up
-const S1a = (f: number) => dolly(add(NEST, [-3.2, 1.45, -0.45]), add(HERO_EMU, [0, 0.9, 0]), pushK(f, 0, 0.0025), { fov: 42, roll: -0.03 });
+const S1a = (f: number) => dolly(add(NEST, [-2.5, 2.35, 0.05]), add(HERO_EMU, [0, 0.7, 0]), pushK(f, 0, 0.0025), { fov: 44, roll: -0.03 });
 const S1b = (f: number) => dolly(add(HERO_EMU, [-2.2, 1.55, -0.5]), add(HERO_EMU, [0.05, 1.6, 0]), pushK(f, 92, 0.003, 0.007, 20), { fov: 36 });
 // shot 2: MS on the soldiers; the emu runs past through frame
 const S2a = (f: number) => dolly(add(NEST, [3.2, 1.4, -8.6]), add(NEST, [-0.6, 0.9, 0.4]), pushK(f, 108, 0.0025), { fov: 42, roll: 0.03 });
