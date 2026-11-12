@@ -400,12 +400,12 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     let target: V3 | null = null;
     if (id === 17) {
       const wet = f >= 1440;
-      for (let k = 0; k < 5; k++) {
-        const x = HOSE[0] - 7 + k * 0.85, z = HOSE[2] + 1.8 + (k % 2) * 0.2;
+      for (let k = 0; k < 4; k++) {
+        const x = HOSE[0] - 4.6 + k * 0.8, z = HOSE[2] + 1.8 + (k % 2) * 0.2;
         one(out, cam, t, GUNNER(k), x, 0, z, { expr: wet ? exprAt(t, [[1440, "shock"], [1488, "pained"]]) : "stern" });
         if (wet) fx(out, `drip${q((t * 2 + k * 0.3) % 1, 12)}`, 300, (p) => fxDrips(p, q((t * 2 + k * 0.3) % 1, 12)), x, 1.0, z - 0.1, 0.9, { h: 1.8, soft: true });
       }
-      if (f >= 1420) target = [HOSE[0] - 5.3 + 1.5 * Math.sin((f - 1420) * 0.06), 1.3, HOSE[2] + 1.8];
+      if (f >= 1420) target = [HOSE[0] - 3.4 + 1.2 * Math.sin((f - 1420) * 0.06), 1.3, HOSE[2] + 1.8];
     } else {
       const t0 = 1530 / FPS;
       for (let k = 0; k < 14; k++) {
@@ -434,7 +434,7 @@ export const stage = (id: number, t: number, cam: CamInfo): Stage => {
     one(out, cam, t, MAJ, MAJOR_DAM[0], my, MAJOR_DAM[2], { expr: id === 12 ? exprAt(t, [[923, "stern"], [984, "shock"]]) : "stern", look: 0 });
     const firing = (id === 12 && f >= 990) || (id === 13 && f < 1051);
     if (firing && f % 3 !== 2) { // muzzle flash at the end of the shroud
-      fx(out, `muz${f % 3}`, 400, (p) => fxMuzzle(p, f % 3), DAM_GUN[0] + 0.15, DAM_GUN[1] + 1.18, DAM_GUN[2] + 0.95, 0.75, { soft: false });
+      fx(out, `muz${f % 3}`, 400, (p) => fxMuzzle(p, f % 3), DAM_GUN[0] + 0.15, DAM_GUN[1] + 1.18, DAM_GUN[2] + 0.95, id === 13 && f >= 1040 ? 0.35 : 0.75, { soft: false });
     }
     if (id === 13) smoke(out, t, 1051 / FPS, DAM_GUN[0], DAM_GUN[1] + 1.35, DAM_GUN[2] - 0.05, 0.9, 1.4);
     // emus round the water: drinking, then scattering from the first shot
